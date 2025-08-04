@@ -1,43 +1,5 @@
-import pytest
-
-USER1 = {"email": "owner@example.com", "password": "testpass123"}
-USER2 = {"email": "shared@example.com", "password": "testpass123"}
-USER3 = {"email": "readonly@example.com", "password": "testpass123"}
-
-
-@pytest.fixture
-def user_tokens(client):
-    # Register and login 3 users
-    tokens = {}
-    for user in [USER1, USER2, USER3]:
-        client.post("/api/auth/register", json=user)
-        resp = client.post(
-            "/api/auth/login",
-            data={"username": user["email"], "password": user["password"]},
-        )
-        tokens[user["email"]] = resp.json()["access_token"]
-    yield tokens
-    # Teardown: delete users after test (cascade deletes budgets, shares, cats, txns)
-    for user in [USER1, USER2, USER3]:
-        client.delete(f"/api/users/{user['email']}")
-
-
-def test_budget_sharing_permissions(client, user_tokens):
-    owner_token = user_tokens[USER1["email"]]
-    shared_token = user_tokens[USER2["email"]]
-    readonly_token = user_tokens[USER3["email"]]
-
-    # Owner creates budget
-    resp = client.post(
-        "/api/budgets/",
-        json={"name": "Shared Budget"},
-        headers={"Authorization": f"Bearer {owner_token}"},
-    )
-    assert resp.status_code == 200, resp.text
-    budget_id = resp.json()["id"]
-
-    # Owner shares with USER2 (write) and USER3 (read only)
-    resp = client.post(
+# DEPRECATED: This test file is no longer in use as of the multi-tenant refactor (August 2025).
+# All budget sharing logic has been removed from the codebase.
         "/api/budgets/share",
         params={"budget_id": budget_id, "user_id": 2, "can_write": True},
         headers={"Authorization": f"Bearer {owner_token}"},
