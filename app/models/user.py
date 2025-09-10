@@ -1,8 +1,11 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from uuid import UUID
 from sqlmodel import SQLModel, Field, Relationship
-from app.models import AccountMembership, Account, Entry
+
+if TYPE_CHECKING:
+    from app.models.account import Account
+    from app.models.entry import Entry
 
 
 class User(SQLModel, table=True):
@@ -14,6 +17,7 @@ class User(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     memberships: List["Account"] = Relationship(
-        back_populates="members", link_model=AccountMembership
+        back_populates="members",
+        sa_relationship_kwargs={"secondary": "accountmembership"},
     )
     entries: List["Entry"] = Relationship(back_populates="creator")

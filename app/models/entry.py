@@ -1,9 +1,12 @@
 from datetime import datetime, date
-import enum
-from sqlmodel import SQLModel, Field, Relationship
+from typing import Optional, TYPE_CHECKING
 from uuid import UUID
-from typing import Optional
-from app.models import Account, Category, User
+from sqlmodel import SQLModel, Field, Relationship
+
+if TYPE_CHECKING:
+    from app.models.account import Account
+    from app.models.category import Category
+    from app.models.user import User
 
 
 class Entry(SQLModel, table=True):
@@ -19,6 +22,6 @@ class Entry(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-    account: Account = Relationship(back_populates="entries")
-    category: Optional[Category] = Relationship(back_populates="entries")
-    creator: Optional[User] = Relationship(back_populates="entries")
+    account: "Account" = Relationship(back_populates="entries")
+    category: Optional["Category"] = Relationship(back_populates="entries")
+    creator: Optional["User"] = Relationship(back_populates="entries")

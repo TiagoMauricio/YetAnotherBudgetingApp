@@ -1,8 +1,10 @@
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 from uuid import UUID
-from sqlalchemy.orm import Relationship
-from sqlmodel import SQLModel, Field
-from app.models import Account, Entry
+from sqlmodel import SQLModel, Field, Relationship
+
+if TYPE_CHECKING:
+    from app.models.entry import Entry
+    from app.models.account import Account
 
 
 class Category(SQLModel, table=True):
@@ -12,5 +14,5 @@ class Category(SQLModel, table=True):
     type: str = Field(regex="^(income|expense)$")
     is_default: bool = Field(default=False)
 
-    account: Optional[Account] = Relationship(back_populates="categories")
+    account: Optional["Account"] = Relationship(back_populates="categories")
     entries: List["Entry"] = Relationship(back_populates="category")
