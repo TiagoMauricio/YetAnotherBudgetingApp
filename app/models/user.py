@@ -1,12 +1,19 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
-from app.database import Base
+from datetime import datetime
+from typing import Optional, List
+from uuid import UUID
+from sqlmodel import SQLModel, Field, Relationship
+from app.models import AccountMembership, Account, Entry
 
 
-class User(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
-    is_active = Column(Boolean, default=True)
-    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
-    role = Column(String, nullable=False)
+class User(SQLModel, table=True):
+    id: UUID = Field(primary_key=True)
+    email: str = Field(unique=True, index=True, nullable=False)
+    password_hash: str = Field(nullable=False)
+    name: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    memberships: List["Account"] = Relationship(
+        back_populates="members", link_model=AccountMembership
+    )
+    entries: List["Entry"] = Relationship(back_populates="creator")

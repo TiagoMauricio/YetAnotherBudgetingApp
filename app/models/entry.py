@@ -1,23 +1,24 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum
-from sqlalchemy.orm import relationship
-from app.database import Base
-from datetime import datetime
+from datetime import datetime, date
 import enum
+from sqlmodel import SQLModel, Field, Relationship
+from uuid import UUID
+from typing import Optional
+from app.models import Account, Category, User
 
-class EntryType(enum.Enum):
-    expense = "expense"
-    income = "income"
 
-class Entry(Base):
-    __tablename__ = "entries"
-    id = Column(Integer, primary_key=True, index=True)
-    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
-    type = Column(Enum(EntryType), nullable=False)
-    amount = Column(Float, nullable=False)
-    note = Column(String, nullable=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+class Entry(SQLModel, table=True):
+    id: UUID = Field(primary_key=True)
+    account_id: UUID = Field(foreign_key="account.id", nullable=False)
+    category_id: Optional[UUID] = Field(foreign_key="category.id")
+    user_id: Optional[UUID] = Field(foreign_key="user.id")
+    type: str = Field(regex="^(income|expense)$")
+    amount: float
+    currency: str = Field(default="USD")
+    description: Optional[str] = None
+    entry_date: date
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-    user = relationship("User")
-    category = relationship("Category")
+    account: Account = Relationship(back_populates="entries")
+    category: Optional[Category] = Relationship(back_populates="entries")
+    creator: Optional[User] = Relationship(back_populates="entries")

@@ -1,21 +1,16 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
-from sqlalchemy.orm import relationship
-from app.database import Base
-from app.utils.encryption import encrypt_field, decrypt_field
+from typing import List, Optional
+from uuid import UUID
+from sqlalchemy.orm import Relationship
+from sqlmodel import SQLModel, Field
+from app.models import Account, Entry
 
 
-class Category(Base):
-    __tablename__ = "categories"
-    id = Column(Integer, primary_key=True, index=True)
-    name_encrypted = Column(String, nullable=False)
-    is_global = Column(Boolean, default=False)
-    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=True)
-    transactions = relationship("Transaction", back_populates="category")
+class Category(SQLModel, table=True):
+    id: UUID = Field(primary_key=True)
+    account_id: Optional[UUID] = Field(default=None, foreign_key="account.id")
+    name: str
+    type: str = Field(regex="^(income|expense)$")
+    is_default: bool = Field(default=False)
 
-    @property
-    def name(self):
-        return decrypt_field(self.name_encrypted)
-
-    @name.setter
-    def name(self, value):
-        self.name_encrypted = encrypt_field(value)
+    account: Optional[Account] = Relationship(back_populates="categories")
+    entries: List["Entry"] = Relationship(back_populates="category")
