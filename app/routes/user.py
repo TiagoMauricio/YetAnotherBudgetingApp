@@ -13,7 +13,7 @@ from app.crud.user import (
     delete_user,
     get_user_accounts
 )
-from app.database import SessionLocal
+from app.database import get_session
 from app.models.user import User
 from app.schemas.user import UserOut, UserUpdate
 from app.utils.security import get_current_active_user
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 def get_db():
-    db = SessionLocal()
+    db = get_session()
     try:
         yield db
     finally:

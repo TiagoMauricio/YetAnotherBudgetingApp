@@ -1,12 +1,7 @@
 from datetime import datetime
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, List
 from uuid import UUID
 from sqlmodel import SQLModel, Field, Relationship
-
-if TYPE_CHECKING:
-    from app.models.account import Account
-    from app.models.entry import Entry
-
 
 class User(SQLModel, table=True):
     id: UUID = Field(primary_key=True)

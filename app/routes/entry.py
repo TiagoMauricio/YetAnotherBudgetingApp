@@ -15,7 +15,7 @@ from app.crud.entry import (
     get_entries_by_account
 )
 from app.crud.account import get_account
-from app.database import SessionLocal
+from app.database import get_session
 from app.models.user import User
 from app.schemas.entry import EntryCreate, EntryUpdate, EntryOut
 from app.utils.security import get_current_active_user
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/entries", tags=["entries"])
 
 
 def get_db():
-    db = SessionLocal()
+    db = get_session()
     try:
         yield db
     finally:
@@ -42,13 +42,13 @@ async def create_new_entry(
     account = get_account(db, account_id=entry.account_id)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
-    
+
     if not any(member.user_id == current_user.id for member in account.members):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions to add entries to this account"
         )
-    
+
     return create_entry(db=db, entry=entry, user_id=current_user.id)
 
 
@@ -69,13 +69,13 @@ async def list_entries(
         account = get_account(db, account_id=account_id)
         if not account:
             raise HTTPException(status_code=404, detail="Account not found")
-        
+
         if not any(member.user_id == current_user.id for member in account.members):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not enough permissions to view entries for this account"
             )
-        
+
         if category_id:
             return get_entries_by_category(
                 db=db,
@@ -118,18 +118,18 @@ async def get_entry_details(
     db_entry = get_entry(db, entry_id=entry_id)
     if not db_entry:
         raise HTTPException(status_code=404, detail="Entry not found")
-    
+
     # Verify user has access to the account this entry belongs to
     account = get_account(db, account_id=db_entry.account_id)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
-    
+
     if not any(member.user_id == current_user.id for member in account.members):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions to view this entry"
         )
-    
+
     return db_entry
 
 
@@ -145,30 +145,30 @@ async def update_entry_details(
     db_entry = get_entry(db, entry_id=entry_id)
     if not db_entry:
         raise HTTPException(status_code=404, detail="Entry not found")
-    
+
     # Verify user has access to the account this entry belongs to
     account = get_account(db, account_id=db_entry.account_id)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
-    
+
     if not any(member.user_id == current_user.id for member in account.members):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions to update this entry"
         )
-    
+
     # If changing accounts, verify access to the new account
     if entry_update.account_id and entry_update.account_id != db_entry.account_id:
         new_account = get_account(db, account_id=entry_update.account_id)
         if not new_account:
             raise HTTPException(status_code=404, detail="New account not found")
-        
+
         if not any(member.user_id == current_user.id for member in new_account.members):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not enough permissions to move entry to the specified account"
             )
-    
+
     return update_entry(db, entry_id=entry_id, entry=entry_update)
 
 
@@ -183,17 +183,17 @@ async def delete_existing_entry(
     db_entry = get_entry(db, entry_id=entry_id)
     if not db_entry:
         raise HTTPException(status_code=404, detail="Entry not found")
-    
+
     # Verify user has access to the account this entry belongs to
     account = get_account(db, account_id=db_entry.account_id)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
-    
+
     if not any(member.user_id == current_user.id for member in account.members):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions to delete this entry"
         )
-    
+
     delete_entry(db, entry_id=entry_id)
     return {"ok": True}

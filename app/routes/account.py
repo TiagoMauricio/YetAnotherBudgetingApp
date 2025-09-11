@@ -15,7 +15,7 @@ from app.crud.account import (
     remove_account_member,
     get_account_members
 )
-from app.database import SessionLocal
+from app.database import get_session
 from app.models.user import User
 from app.schemas.account import AccountCreate, AccountUpdate, AccountOut, AccountMemberUpdate
 from app.utils.security import get_current_active_user
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/accounts", tags=["accounts"])
 
 
 def get_db():
-    db = SessionLocal()
+    db = get_session()
     try:
         yield db
     finally:
@@ -62,14 +62,14 @@ async def get_account_details(
     db_account = get_account(db, account_id=account_id)
     if not db_account:
         raise HTTPException(status_code=404, detail="Account not found")
-    
+
     # Check if user has access to this account
     if not any(member.user_id == current_user.id for member in db_account.members):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions to access this account"
         )
-    
+
     return db_account
 
 
@@ -84,14 +84,14 @@ async def update_account_details(
     db_account = get_account(db, account_id=account_id)
     if not db_account:
         raise HTTPException(status_code=404, detail="Account not found")
-    
+
     # Check if user is the owner
     if db_account.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only the account owner can update account details"
         )
-    
+
     return update_account(db, account_id=account_id, account=account_update)
 
 
@@ -105,13 +105,13 @@ async def delete_existing_account(
     db_account = get_account(db, account_id=account_id)
     if not db_account:
         raise HTTPException(status_code=404, detail="Account not found")
-    
+
     if db_account.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only the account owner can delete the account"
         )
-    
+
     delete_account(db, account_id=account_id)
     return {"ok": True}
 
@@ -127,13 +127,13 @@ async def list_account_members(
     account = get_account(db, account_id=account_id)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
-    
+
     if not any(member.user_id == current_user.id for member in account.members):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions to view this account"
         )
-    
+
     return get_account_members(db, account_id=account_id)
 
 
@@ -149,13 +149,13 @@ async def add_member_to_account(
     account = get_account(db, account_id=account_id)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
-    
+
     if account.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only the account owner can add members"
         )
-    
+
     return add_account_member(
         db=db,
         account_id=account_id,
@@ -176,13 +176,13 @@ async def update_account_member(
     account = get_account(db, account_id=account_id)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
-    
+
     if account.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only the account owner can update member roles"
         )
-    
+
     return update_account_member(
         db=db,
         account_id=account_id,
@@ -202,19 +202,19 @@ async def remove_member_from_account(
     account = get_account(db, account_id=account_id)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
-    
+
     if account.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only the account owner can remove members"
         )
-    
+
     # Prevent removing the account owner
     if account.owner_id == user_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot remove the account owner"
         )
-    
+
     remove_account_member(db, account_id=account_id, user_id=user_id)
     return {"ok": True}
