@@ -1,5 +1,6 @@
 annotated-types==0.7.0
 anyio==4.10.0
+bcrypt==4.3.0
 certifi==2025.8.3
 click==8.2.1
 dnspython==2.8.0
@@ -14,6 +15,7 @@ httptools==0.6.4
 httpx==0.28.1
 idna==3.10
 Jinja2==3.1.6
+libpass==1.9.1.post0
 markdown-it-py==4.0.0
 MarkupSafe==3.0.2
 mdurl==0.1.2
