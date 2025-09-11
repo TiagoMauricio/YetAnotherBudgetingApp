@@ -20,6 +20,3 @@ class User(UserBase):
     id: UUID
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True

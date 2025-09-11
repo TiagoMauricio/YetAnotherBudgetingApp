@@ -8,6 +8,10 @@ A secure, lightweight FastAPI backend for personal finance budgeting, supporting
 - Users, budgets, categories, transactions, and budget sharing
 - Secure-by-default: password hashing, JWT secrets, encrypted fields
 
+## For development
+
+Reference repository: https://github.com/fastapi/full-stack-fastapi-template/tree/master
+
 ## Folder Structure
 
 ```plain_text
@@ -41,9 +45,7 @@ app/
 - `/api/auth/register` — Register user
 - `/api/auth/login` — Login user (returns JWT)
 - `/api/users/me` — Get current user
-- `/api/budgets/` — CRUD budgets, share budgets
-- `/api/categories/` — CRUD categories
-- `/api/transactions/` — CRUD transactions
+- `/api/users/` — CRUD users
 
 ## Docker
 
@@ -64,16 +66,11 @@ PYTHONPATH=. pytest
 
 This will execute all tests in the `tests/` directory using your current environment and database. For a clean test run, ensure your virtual environment is activated and dependencies are installed.
 
-- All sensitive fields are encrypted at rest using Fernet.
-- JWT secret and Fernet key are loaded from environment variables.
-- Passwords are hashed using bcrypt.
-
 ## API Documentation
 
 When the backend server is running, interactive API documentation is automatically generated and available via Swagger UI. To access it, open your browser and navigate to:
 
 - `http://localhost:8000/docs` for Swagger UI
-- `http://localhost:8000/redoc` for ReDoc UI
 - `http://localhost:8000/openapi.json` for the raw OpenAPI specification
 
 These endpoints allow you to explore and test your API interactively.
