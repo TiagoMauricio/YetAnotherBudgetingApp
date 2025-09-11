@@ -1,7 +1,6 @@
 from sqlmodel import Session, select
 from app.models import User
 from app.schemas import UserCreate
-from uuid import uuid4
 from app.utils.security import hash_password
 
 def find_user_by_email(email: str, session: Session):
@@ -11,7 +10,6 @@ def find_user_by_email(email: str, session: Session):
 
 def create_user(user: UserCreate, session: Session):
     new_user = User(
-        id=uuid4(),
         email=user.email,
         name=user.name,
         password_hash=hash_password(user.password)

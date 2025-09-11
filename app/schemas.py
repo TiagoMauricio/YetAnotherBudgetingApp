@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Optional
-from uuid import UUID
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -17,6 +16,9 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     """Schema for user response (excludes sensitive data)"""
-    id: UUID
+    id: int
     created_at: datetime
     updated_at: datetime
+
+#    class Config:
+#        from_attributes = True
