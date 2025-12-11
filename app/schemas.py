@@ -6,7 +6,7 @@ from pydantic import BaseModel, EmailStr, Field
 class UserBase(BaseModel):
     """Base user schema with common fields"""
     email: EmailStr
-    name: Optional[str] = None
+    name: None
 
 
 class UserCreate(UserBase):

@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
 
+from typing import Annotated
+
 from app.database import get_session
 import app.crud.users as user_crud
 from app.schemas.users import UserCreate, User as UserResponse
@@ -13,8 +15,9 @@ from app.utils.security import (
     create_refresh_token,
     verify_refresh_token,
     revoke_refresh_token,
-    verify_token
 )
+
+from app.utils.dependencies import get_current_user
 
 router = APIRouter(tags=["authentication"])
 
@@ -88,6 +91,7 @@ async def login(
 
 @router.post("/refresh", response_model=Token)
 async def refresh_token(
+    token: Annotated[str, Depends(get_current_user)],
     token_data: TokenRefresh,
     session: Session = Depends(get_session),
 ) -> Token:
@@ -116,16 +120,14 @@ async def refresh_token(
         ) from exc
 
 @router.post("/logout")
-async def logout(token_data: Token, session: Session = Depends(get_session)):
+async def logout(token: Annotated[str, Depends(get_current_user)], session: Session = Depends(get_session)):
     """
     Logout a user when a session is provided
     - **auth_token**: A valid authentication token
     """
     try:
         # TODO: how to actually logout the user?
-        payload = verify_token(token_data.auth_token)
-        user_id = int(payload.get("sub"))
-        revoke_token(token_data.auth_token, session)
+        revoke_token(token, session)
     except HTTPException as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

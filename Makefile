@@ -8,6 +8,7 @@ test:
 
 # Install production dependencies
 install:
+	$(PYTHON) -m pip install pip --upgrade
 	$(PYTHON) -m pip install -r requirements.txt
 
 # Format code with Black

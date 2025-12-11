@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Any
+from typing import Any
 
 from sqlmodel import Session, select
 
@@ -7,6 +7,8 @@ import jwt
 from fastapi import HTTPException, status
 from argon2 import PasswordHasher, exceptions
 from app.models import RefreshToken
+
+from fastapi.security import OAuth2PasswordBearer
 
 from app.config import settings
 
@@ -24,6 +26,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='api/auth/login')
 
 def hash_password(password: str) -> str:
     """Hash a password using Argon2"""
@@ -43,7 +46,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         )
 
 
-def create_access_token(data: Dict[str, Any]) -> str:
+def create_access_token(data: dict[str, Any]) -> str:
     """Create a new JWT access token"""
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -51,7 +54,7 @@ def create_access_token(data: Dict[str, Any]) -> str:
     return jwt.encode(to_encode, settings.secret_key, algorithm=ALGORITHM)
 
 
-def verify_token(token: str) -> Dict[str, Any]:
+def verify_token(token: str) -> dict[str, Any]:
     """Verify JWT access token and return its payload"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -91,7 +94,7 @@ def create_refresh_token(user_id: int, db: Session) -> str:
     return token
 
 
-def verify_refresh_token(token: str) -> Dict[str, Any]:
+def verify_refresh_token(token: str) -> dict[str, Any]:
     """Verify refresh token and return its payload"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
