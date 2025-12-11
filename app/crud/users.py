@@ -1,12 +1,13 @@
 from sqlmodel import Session, select
+from app.database import get_session
 from app.models import User
 from app.schemas.users import UserCreate
 from app.utils.security import hash_password
-from fastapi import HTTPException
+from fastapi import Depends, HTTPException
 
 
 def find_user_by_email(email: str, session: Session):
-    database_query = select(User).where(User.email == email)
+    database_query = select(User).where(User.email == email and User.is_active)
     user = session.exec(database_query).first()
     return user
 
