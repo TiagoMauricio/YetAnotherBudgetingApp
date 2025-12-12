@@ -1,5 +1,7 @@
 # YABA - Yet Another Budgeting App
 
+**[Yabba-Dabba-Doo!](https://flintstones.fandom.com/wiki/Yabba-Dabba-Doo!)**
+
 A self hostable API for personal expense tracking built with [FastAPI](https://github.com/fastapi/fastapi)
 
 ## Context
