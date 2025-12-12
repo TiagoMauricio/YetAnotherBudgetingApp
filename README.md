@@ -29,7 +29,9 @@ I've built a couple tools using Django and worked in a professional setting with
 
 ## Contributing
 
-If you wsh to contribute:
+Contributions are welcome! :smile:
+
+If you wish to contribute:
 - Fork the project and create a PR.
 - Create an issue on this repo.
 - I have a Discord for my projects, I can add you to it.
