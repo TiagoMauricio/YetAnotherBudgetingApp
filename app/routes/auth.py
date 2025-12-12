@@ -79,8 +79,8 @@ async def login(
     session.commit()
     session.refresh(user)
 
-    access_token = create_access_token(data={"sub": str(user.email)})
-    refresh_token = create_refresh_token(user.id, session)
+    access_token = create_access_token(data={"sub": user.email})
+    refresh_token = create_refresh_token(data={"sub": user.email}, user_id=user.id, db=session)
 
     return Token(
         access_token=access_token,
@@ -91,7 +91,6 @@ async def login(
 
 @router.post("/refresh", response_model=Token)
 async def refresh_token(
-    token: Annotated[str, Depends(get_current_user)],
     token_data: TokenRefresh,
     session: Session = Depends(get_session),
 ) -> Token:
@@ -101,12 +100,11 @@ async def refresh_token(
     """
     try:
         payload = verify_refresh_token(token_data.refresh_token)
-        print(payload)
-        user_id = int(payload.get("sub"))
-        print(user_id)
-        revoke_refresh_token(token_data.refresh_token, session)
-        access_token = create_access_token(data={"sub": str(user_id)})
-        refresh_token = create_refresh_token(user_id, session)
+        user_email = payload.get("sub")
+        user = user_crud.find_user_by_email(email=user_email, session=session)
+        revoke_refresh_token(token=token_data.refresh_token, db=session)
+        access_token: str = create_access_token(data={"sub": user_email})
+        refresh_token: str = create_refresh_token(data={"sub": user_email}, user_id=user.id, db=session)
         return Token(
             access_token=access_token,
             refresh_token=refresh_token,
@@ -114,7 +112,7 @@ async def refresh_token(
         )
     except HTTPException as exc:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid refresh token",
             headers={"WWW-Authenticate": "Bearer"},
         ) from exc
