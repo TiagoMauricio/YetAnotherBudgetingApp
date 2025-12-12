@@ -10,7 +10,7 @@ connect_args = (
 )
 DATABASE_URL = settings.database_url
 
-engine = create_engine(DATABASE_URL, connect_args=connect_args)
+engine = create_engine(url=DATABASE_URL, connect_args=connect_args)
 
 
 def create_db_and_tables():

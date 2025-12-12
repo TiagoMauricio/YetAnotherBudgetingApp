@@ -57,7 +57,7 @@ async def register_user(
 
 @router.post("/login", response_model=Token)
 async def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Session = Depends(get_session),
 ) -> Token:
     """OAuth2 compatible token login, get an access token for future requests.
@@ -79,7 +79,7 @@ async def login(
     session.commit()
     session.refresh(user)
 
-    access_token = create_access_token(data={"sub": str(user.id)})
+    access_token = create_access_token(data={"sub": str(user.email)})
     refresh_token = create_refresh_token(user.id, session)
 
     return Token(
