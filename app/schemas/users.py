@@ -1,12 +1,11 @@
 from datetime import datetime
-from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
 
 
 class UserBase(BaseModel):
     """Base user schema with common fields"""
     email: EmailStr
-    name: Optional[str] = None
+    name: str | None = None
 
 
 class UserCreate(UserBase):

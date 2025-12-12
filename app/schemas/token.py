@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 
@@ -14,5 +12,5 @@ class TokenRefresh(BaseModel):
 
 
 class TokenData(BaseModel):
-    email: Optional[str] = None
-    sub: Optional[str] = None
+    email: str | None = None
+    sub: str | None = None
