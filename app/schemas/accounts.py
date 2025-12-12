@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-from typing import Optional
 from datetime import datetime
 
 
@@ -8,7 +7,7 @@ class AccountBase(BaseModel):
     """Base account schema with common fields"""
     name: str = Field(..., min_length=1, max_length=100, description="Account name")
     currency_code: str = Field(..., min_length=3, max_length=3, description="3-letter currency code (e.g., USD, EUR)")
-    description: Optional[str] = Field(None, max_length=500, description="Optional account description")
+    description: str | None = Field(None, max_length=500, description="Optional account description")
 
 
 class AccountCreate(AccountBase):
@@ -16,9 +15,9 @@ class AccountCreate(AccountBase):
 
 class AccountUpdate(BaseModel):
     """Schema for updating an account"""
-    name: Optional[str] = Field(None, min_length=1, max_length=100, description="Account name")
-    currency_code: Optional[str] = Field(None, min_length=3, max_length=3, description="3-letter currency code")
-    description: Optional[str] = Field(None, max_length=500, description="Account description")
+    name: str | None = Field(None, min_length=1, max_length=100, description="Account name")
+    currency_code: str | None = Field(None, min_length=3, max_length=3, description="3-letter currency code")
+    description: str | None = Field(None, max_length=500, description="Account description")
 
 
 class Account(AccountBase):
@@ -35,7 +34,7 @@ class AccountMember(BaseModel):
     """Schema for account member information"""
     user_id: int
     email: str
-    name: Optional[str]
+    name: str | None
     role: str
     is_owner: bool
     joined_at: datetime
