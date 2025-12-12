@@ -7,7 +7,7 @@ A self hostable API for personal expense tracking built with [FastAPI](https://g
 There are many great opensource options for personal finance tracking. However, I felt like they were either too feature full or lacking particular features I was looking for.
 YABA strives to achieve a middle ground where it can track your personal finances and share the progress with your significant other so that multiple people can register expenses on the same account.
 
-**WARNING**: This API is still in early stages of development.
+:warning:**WARNING**: This API is still in early stages of development.
 
 ## Technology
 
@@ -21,7 +21,7 @@ If you wish to contribute, please reach out:
 - Create an issue on this repo.
 - I have a Discord for my projects, I can add you to it.
 
-This is my first opensource project that I am looking for contributions for and I am still learning how to manage this ☺
+This is my first opensource project that I am looking for contributions for and I am still learning how to manage this :blush:
 
 ## Setup
 
