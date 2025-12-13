@@ -4,7 +4,7 @@ PYTHON=python3
 
 # Run tests
 test:
-	PYTHONPATH=. $(PYTHON) -m pytest tests/ -v
+	PYTHONPATH=. $(PYTHON) -m pytest $(TEST) -v
 
 # Install production dependencies
 install:
