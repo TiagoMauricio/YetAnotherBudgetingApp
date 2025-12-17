@@ -5,7 +5,7 @@ A self hostable API for personal expense tracking built with [FastAPI](https://g
 ## Context
 
 There are many great opensource options for personal finance tracking. However, I felt like they were either too feature full or lacking particular features I was looking for.
-YABA strives to achieve a middle ground where it can track your personal finances and share the progress with your significant other so that multiple people can register expenses on the same account.
+Pexa strives to achieve a middle ground where it can track your personal finances and share the progress with your significant other so that multiple people can register expenses on the same account.
 
 :warning: This API is still in early stages of development.
 
