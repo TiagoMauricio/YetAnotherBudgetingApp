@@ -10,8 +10,8 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="Personal Budget App",
-    description="API for Yet Another Budgeting Application",
+    title="Pexa - Personal Expense API",
+    description="A self hostable API for personal expense tracking built with FastAPI",
     version="1.0.0",
     lifespan=lifespan,
 )
