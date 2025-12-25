@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
+from typing import ClassVar
 
 
 # Account Schemas
@@ -22,8 +23,7 @@ class Account(AccountBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config: ClassVar[ConfigDict] = ConfigDict(from_attributes=True)
 
 
 class AccountMember(BaseModel):
