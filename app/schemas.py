@@ -39,7 +39,6 @@ class AccountCreate(AccountBase):
 
 class AccountUpdate(BaseModel):
     """Schema for updating an account"""
-    name: Optional[str] = Field(None, min_length=1, max_length=100, description="Account name")
     currency_code: Optional[str] = Field(None, min_length=3, max_length=3, description="3-letter currency code")
     description: Optional[str] = Field(None, max_length=500, description="Account description")
 

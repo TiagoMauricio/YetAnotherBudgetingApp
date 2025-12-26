@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
+from typing import ClassVar
 
 
 # Account Schemas
@@ -10,12 +11,8 @@ class AccountBase(BaseModel):
     description: str | None = Field(None, max_length=500, description="Optional account description")
 
 
-class AccountCreate(AccountBase):
-    owner_id: int
-
 class AccountUpdate(BaseModel):
     """Schema for updating an account"""
-    name: str | None = Field(None, min_length=1, max_length=100, description="Account name")
     currency_code: str | None = Field(None, min_length=3, max_length=3, description="3-letter currency code")
     description: str | None = Field(None, max_length=500, description="Account description")
 
@@ -26,8 +23,7 @@ class Account(AccountBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config: ClassVar[ConfigDict] = ConfigDict(from_attributes=True)
 
 
 class AccountMember(BaseModel):
