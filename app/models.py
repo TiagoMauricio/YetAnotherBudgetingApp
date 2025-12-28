@@ -20,7 +20,7 @@ class User(SQLModel, table=True):
     refresh_tokens: list["RefreshToken"] = Relationship(back_populates="user")
 
 
-class Entry(SQLModel, table=True):
+class Transaction(SQLModel, table=True):
     id: int = Field(primary_key=True)
     account_id: int = Field(foreign_key="account.id", nullable=False)
     category_id: int | None = Field(foreign_key="category.id")
@@ -28,7 +28,7 @@ class Entry(SQLModel, table=True):
     type: str = Field(regex="^(income|expense)$")
     amount: float
     description: str | None = None
-    entry_date: datetime
+    date: datetime
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
 
