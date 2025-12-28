@@ -2,16 +2,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 
-def _get_bearer_headers(bearer_token: str):
-    headers = {
-        "Authorization": f"Bearer {bearer_token}"
-    }
-    return headers
-
-
-def test_create_account(client: TestClient, token):
+def test_create_account(helpers, client: TestClient, token):
     """Test successful creation"""
-    headers = _get_bearer_headers(token)
+    headers = helpers.get_bearer_headers(token)
     payload = {
         "name": "My Test account",
         "currency_code": "EUR",
@@ -21,10 +14,10 @@ def test_create_account(client: TestClient, token):
     assert response.status_code == 201
 
 
-def test_create_account_error(client: TestClient, token):
+def test_create_account_error(helpers, client: TestClient, token):
     """Test error on account creation"""
 
-    headers = _get_bearer_headers(token)
+    headers = helpers.get_bearer_headers(token)
     payload = {
         "name": "Incorrect Payload Account",
         "description": ""
@@ -34,9 +27,9 @@ def test_create_account_error(client: TestClient, token):
     assert response.status_code == 422
 
 
-def test_duplicate_account_name(client: TestClient, token):
+def test_duplicate_account_name(helpers, client: TestClient, token):
     """Test duplicate account name"""
-    headers = _get_bearer_headers(token)
+    headers = helpers.get_bearer_headers(token)
     payload = {
         "name": "Duplicated test account",
         "currency_code": "EUR",
@@ -49,9 +42,9 @@ def test_duplicate_account_name(client: TestClient, token):
     assert response2.status_code == 400
 
 
-def test_update_account(client: TestClient, token):
+def test_update_account(helpers, client: TestClient, token):
     """Test update account"""
-    headers = _get_bearer_headers(token)
+    headers = helpers.get_bearer_headers(token)
 
     # create test account
     payload_creation = {
@@ -73,9 +66,9 @@ def test_update_account(client: TestClient, token):
     assert response_update.json()['currency_code'] == payload_update['currency_code']
 
 
-def test_get_phorbiden_account(client: TestClient, token):
+def test_get_phorbiden_account(helpers, client: TestClient, token):
     """Attempt access of an account that the user is not an owner of"""
-    headers = _get_bearer_headers(token)
+    headers = helpers.get_bearer_headers(token)
     response = client.get("/api/accounts/1123123", headers=headers)
 
     assert response.status_code == 403
