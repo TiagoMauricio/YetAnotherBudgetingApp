@@ -9,7 +9,7 @@ def test_create_user_success(client: TestClient):
     user_data = {
         "email": "test@example.com",
         "name": "Test User",
-        "password": "testpassword123"
+        "password": "testpassword123",
     }
 
     response = client.post("/api/auth/register", json=user_data)
@@ -31,7 +31,7 @@ def test_create_user_duplicate_email(client: TestClient):
     user_data = {
         "email": "duplicate@example.com",
         "name": "First User",
-        "password": "password123"
+        "password": "password123",
     }
 
     # Create first user
@@ -51,7 +51,7 @@ def test_create_user_invalid_email(client: TestClient):
     user_data = {
         "email": "invalid-email",
         "name": "Test User",
-        "password": "password123"
+        "password": "password123",
     }
 
     response = client.post("/api/auth/register", json=user_data)
@@ -64,7 +64,7 @@ def test_create_user_short_password(client: TestClient):
     user_data = {
         "email": "test@example.com",
         "name": "Test User",
-        "password": "short"  # Less than 8 characters
+        "password": "short",  # Less than 8 characters
     }
 
     response = client.post("/api/auth/register", json=user_data)
@@ -75,26 +75,21 @@ def test_create_user_short_password(client: TestClient):
 def test_create_user_missing_required_fields(client: TestClient):
     """Test creating user with missing required fields fails"""
     # Missing email
-    response1 = client.post("/api/auth/register", json={
-        "name": "Test User",
-        "password": "password123"
-    })
+    response1 = client.post(
+        "/api/auth/register", json={"name": "Test User", "password": "password123"}
+    )
     assert response1.status_code == 422
 
     # Missing password
-    response2 = client.post("/api/auth/register", json={
-        "email": "test@example.com",
-        "name": "Test User"
-    })
+    response2 = client.post(
+        "/api/auth/register", json={"email": "test@example.com", "name": "Test User"}
+    )
     assert response2.status_code == 422
 
 
 def test_create_user_optional_name(client: TestClient):
     """Test creating user without name (optional field) succeeds"""
-    user_data = {
-        "email": "noname@example.com",
-        "password": "password123"
-    }
+    user_data = {"email": "noname@example.com", "password": "password123"}
 
     response = client.post("/api/auth/register", json=user_data)
 
@@ -110,7 +105,7 @@ def test_user_password_is_hashed(client: TestClient, session: Session):
     user_data = {
         "email": "hash@example.com",
         "name": "Hash User",
-        "password": "plainpassword123"
+        "password": "plainpassword123",
     }
 
     response = client.post("/api/auth/register", json=user_data)

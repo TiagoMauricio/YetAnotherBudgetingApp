@@ -9,8 +9,7 @@ class User(SQLModel, table=True):
     name: str | None = None
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(
-        default_factory=datetime.now,
-        sa_column_kwargs={"onupdate": datetime.now}
+        default_factory=datetime.now, sa_column_kwargs={"onupdate": datetime.now}
     )
     is_active: bool = Field(default=True, sa_column_kwargs={"server_default": "1"})
     last_login: datetime | None = None
@@ -63,13 +62,8 @@ class RefreshToken(SQLModel, table=True):
     user_id: int = Field(foreign_key="user.id", nullable=False, index=True)
     token: str = Field(nullable=False, index=True)  # Hashed token
     expires_at: datetime = Field(nullable=False)
-    created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
-    revoked: bool = Field(
-        default=False,
-        sa_column_kwargs={"server_default": "0"}
-    )
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    revoked: bool = Field(default=False, sa_column_kwargs={"server_default": "0"})
 
     # Relationships
     user: "User" = Relationship(back_populates="refresh_tokens")

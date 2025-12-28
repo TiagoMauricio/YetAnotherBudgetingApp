@@ -4,11 +4,7 @@ from fastapi.testclient import TestClient
 def test_create_account(helpers, client: TestClient, token):
     """Test successful creation"""
     headers = helpers.get_bearer_headers(token)
-    payload = {
-        "name": "My Test account",
-        "currency_code": "EUR",
-        "description": ""
-    }
+    payload = {"name": "My Test account", "currency_code": "EUR", "description": ""}
     response = client.post(url="/api/accounts", headers=headers, json=payload)
     assert response.status_code == 201
 
@@ -17,10 +13,7 @@ def test_create_account_error(helpers, client: TestClient, token):
     """Test error on account creation"""
 
     headers = helpers.get_bearer_headers(token)
-    payload = {
-        "name": "Incorrect Payload Account",
-        "description": ""
-    }
+    payload = {"name": "Incorrect Payload Account", "description": ""}
     response = client.post(url="/api/accounts", headers=headers, json=payload)
     print(response.json())
     assert response.status_code == 422
@@ -32,7 +25,7 @@ def test_duplicate_account_name(helpers, client: TestClient, token):
     payload = {
         "name": "Duplicated test account",
         "currency_code": "EUR",
-        "description": ""
+        "description": "",
     }
     response = client.post(url="/api/accounts", headers=headers, json=payload)
     assert response.status_code == 201
@@ -49,20 +42,19 @@ def test_update_account(helpers, client: TestClient, token):
     payload_creation = {
         "name": "Create test account",
         "currency_code": "EUR",
-        "description": "Some description"
+        "description": "Some description",
     }
     response = client.post(url="/api/accounts", headers=headers, json=payload_creation)
     assert response.status_code == 201
 
     # update account
-    payload_update = {
-        "currency_code": "USD",
-        "description": "Changed description"
-    }
-    response_update = client.patch(url="/api/accounts/1", headers=headers, json=payload_update)
+    payload_update = {"currency_code": "USD", "description": "Changed description"}
+    response_update = client.patch(
+        url="/api/accounts/1", headers=headers, json=payload_update
+    )
     assert response_update.status_code == 200
-    assert response_update.json()['description'] == payload_update['description']
-    assert response_update.json()['currency_code'] == payload_update['currency_code']
+    assert response_update.json()["description"] == payload_update["description"]
+    assert response_update.json()["currency_code"] == payload_update["currency_code"]
 
 
 def test_get_phorbiden_account(helpers, client: TestClient, token):

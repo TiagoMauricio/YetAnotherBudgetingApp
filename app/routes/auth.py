@@ -80,12 +80,12 @@ async def login(
     session.refresh(user)
 
     access_token = create_access_token(data={"sub": user.email})
-    refresh_token = create_refresh_token(data={"sub": user.email}, user_id=user.id, db=session)
+    refresh_token = create_refresh_token(
+        data={"sub": user.email}, user_id=user.id, db=session
+    )
 
     return Token(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        token_type="bearer"
+        access_token=access_token, refresh_token=refresh_token, token_type="bearer"
     )
 
 
@@ -104,11 +104,11 @@ async def refresh_token(
         user = user_crud.find_user_by_email(email=user_email, session=session)
         revoke_refresh_token(token=token_data.refresh_token, db=session)
         access_token: str = create_access_token(data={"sub": user_email})
-        refresh_token: str = create_refresh_token(data={"sub": user_email}, user_id=user.id, db=session)
+        refresh_token: str = create_refresh_token(
+            data={"sub": user_email}, user_id=user.id, db=session
+        )
         return Token(
-            access_token=access_token,
-            refresh_token=refresh_token,
-            token_type="bearer"
+            access_token=access_token, refresh_token=refresh_token, token_type="bearer"
         )
     except HTTPException as exc:
         raise HTTPException(
@@ -119,7 +119,11 @@ async def refresh_token(
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-async def logout(refresh_token: str, user: Annotated[str, Depends(get_current_user)], session: Session = Depends(get_session)):
+async def logout(
+    refresh_token: str,
+    user: Annotated[str, Depends(get_current_user)],
+    session: Session = Depends(get_session),
+):
     """
     Logout a user when a session is provided
     - **refresh_token**: A valid refresh token

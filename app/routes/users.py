@@ -11,7 +11,10 @@ router = APIRouter()
 
 
 @router.get("", response_model=list[UserResponse])
-async def get_all_users(token: Annotated[str,Depends(get_current_user)], session: Session = Depends(get_session)):
+async def get_all_users(
+    token: Annotated[str, Depends(get_current_user)],
+    session: Session = Depends(get_session),
+):
     """Fetch all users"""
 
     users = user_crud.find_all_users(session)

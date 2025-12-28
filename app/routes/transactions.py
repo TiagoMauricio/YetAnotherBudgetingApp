@@ -11,25 +11,42 @@ from typing import Annotated
 
 router = APIRouter(tags=["transactions"])
 
-@router.get("/{transaction_id}", response_model=TransactionResponse, status_code=status.HTTP_200_OK)
-async def get_transaction(transaction_id: int, user: Annotated[str, Depends(get_current_user)], session: Session = Depends(get_session)) -> TransactionResponse | None:
-    transaction: TransactionResponse | None = t_crud.find_transaction_by_id(transaction_id, session)
+
+@router.get(
+    "/{transaction_id}",
+    response_model=TransactionResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_transaction(
+    transaction_id: int,
+    user: Annotated[str, Depends(get_current_user)],
+    session: Session = Depends(get_session),
+) -> TransactionResponse | None:
+    transaction: TransactionResponse | None = t_crud.find_transaction_by_id(
+        transaction_id, session
+    )
     # TODO: change responsibility of throwing errors
     if not transaction:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Transaction does not exist."
+            status_code=status.HTTP_404_NOT_FOUND, detail="Transaction does not exist."
         )
     elif not acc_crud.user_has_account_access(user.id, transaction.account_id, session):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have access to this account."
+            detail="You do not have access to this account.",
         )
     return transaction
 
+
 @router.post("", response_model=TransactionResponse)
-async def create_transaction(transaction_data: TransactionResponse, user: Annotated[str, Depends(get_current_user)], session: Session = Depends(get_session)):
-    transaction: TransactionResponse = t_crud.create_transaction(transaction_data, user, session)
+async def create_transaction(
+    transaction_data: TransactionResponse,
+    user: Annotated[str, Depends(get_current_user)],
+    session: Session = Depends(get_session),
+):
+    transaction: TransactionResponse = t_crud.create_transaction(
+        transaction_data, user, session
+    )
     return transaction
 
 
