@@ -49,6 +49,8 @@ def create_account(account: AccountBase, user: User, session: Session) -> Accoun
 
 def get_account_by_id(account_id: int, user: User, session: Session) -> Account | None:
     """Get account by ID"""
+    # TODO: change this logic to find account first, throw 404 it doesnt exist
+    # then check if user has access to it
     user_accounts = get_accounts_by_user(user_id=user.id, session=session)
     if account_id not in [acc.id for acc in user_accounts]:
         raise HTTPException(
