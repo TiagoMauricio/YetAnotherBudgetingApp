@@ -1,19 +1,31 @@
-from datetime import datetime
-from typing import List, Optional
+from fastapi import HTTPException
 from sqlmodel import Session, select
+from collections.abc import Sequence
+from sqlmodel.sql.expression import SelectOfScalar
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 from app.models import Account, AccountMembership, User
-from app.schemas.accounts import AccountCreate
+from app.schemas.accounts import AccountBase, AccountUpdate
 
 
-def get_all_accounts(session: Session) -> List[Account]:
+def get_all_accounts(session: Session) -> Sequence[Account]:
     """Get all accounts"""
-    query = select(Account).order_by(Account.created_at.desc())
-    return session.exec(query).all()
+    query: SelectOfScalar[Account] = select(Account).order_by(Account.created_at.desc())
+    result: Sequence[Account] = session.exec(query).all()
+    return result
 
 
-def create_account(account: AccountCreate, session: Session) -> Account:
+def create_account(account: AccountBase, user: User, session: Session) -> Account:
     """Create a new account and assign the creator as owner"""
-    new_account = Account(
+
+    user_accounts = get_accounts_by_user(user_id=user.id, session=session)
+
+    if account.name in [acc.name for acc in user_accounts]:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"You already have an account named: {account.name}"
+        )
+
+    new_account: Account = Account(
         name=account.name,
         currency_code=account.currency_code,
         description=account.description
@@ -25,7 +37,7 @@ def create_account(account: AccountCreate, session: Session) -> Account:
     # Create membership record with owner role
     membership = AccountMembership(
         account_id=new_account.id,
-        user_id=account.owner_id,
+        user_id=user.id,
         role="owner",
         is_owner=True
     )
@@ -35,12 +47,17 @@ def create_account(account: AccountCreate, session: Session) -> Account:
     return new_account
 
 
-def get_account_by_id(account_id: int, session: Session) -> Optional[Account]:
+def get_account_by_id(account_id: int, user: User, session: Session) -> Account | None:
     """Get account by ID"""
+    user_accounts = get_accounts_by_user(user_id=user.id, session=session)
+    if account_id not in [acc.id for acc in user_accounts]:
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN
+        )
     return session.get(Account, account_id)
 
 
-def get_accounts_by_user(user_id: int, session: Session) -> List[Account]:
+def get_accounts_by_user(user_id: int, session: Session) -> Sequence[Account]:
     """Get all accounts that a user has access to"""
     query = (
         select(Account)
@@ -51,7 +68,7 @@ def get_accounts_by_user(user_id: int, session: Session) -> List[Account]:
     return session.exec(query).all()
 
 
-def get_user_owned_accounts(user_id: int, session: Session) -> List[Account]:
+def get_user_owned_accounts(user_id: int, session: Session) -> Sequence[Account]:
     """Get all accounts owned by a user"""
     query = (
         select(Account)
@@ -65,22 +82,25 @@ def get_user_owned_accounts(user_id: int, session: Session) -> List[Account]:
     return session.exec(query).all()
 
 
-def update_account(account_id: int, name: Optional[str] = None,
-                  currency_code: Optional[str] = None,
-                  description: Optional[str] = None, session: Session = None) -> Optional[Account]:
+def update_account(account_id: int, account_data: AccountUpdate, user: User, session: Session) -> Account | None:
     """Update account details"""
     account = session.get(Account, account_id)
     if not account:
-        return None
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND,
+            detail="Account does not exist."
+        )
+    elif not user_is_account_owner(user.id, account_id, session):
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail="You do not own this account."
+        )
 
-    if name is not None:
-        account.name = name
-    if currency_code is not None:
-        account.currency_code = currency_code
-    if description is not None:
-        account.description = description
+    update_data = account_data.model_dump(exclude_unset=True)
 
-    account.updated_at = datetime.now()
+    for field, value in update_data.items():
+        setattr(account, field, value)
+
     session.add(account)
     session.commit()
     session.refresh(account)
@@ -105,7 +125,7 @@ def delete_account(account_id: int, session: Session) -> bool:
     return True
 
 
-def add_user_to_account(account_id: int, user_id: int, role: str = "member", session: Session = None) -> Optional[AccountMembership]:
+def add_user_to_account(account_id: int, user_id: int, session: Session, role: str = "member") -> AccountMembership | None:
     """Add a user to an account with specified role"""
     # Check if membership already exists
     existing_query = select(AccountMembership).where(
@@ -150,7 +170,7 @@ def remove_user_from_account(account_id: int, user_id: int, session: Session) ->
     return True
 
 
-def get_account_members(account_id: int, session: Session) -> List[dict]:
+def get_account_members(account_id: int, session: Session) -> Sequence[dict]:
     """Get all members of an account with their details"""
     query = (
         select(User, AccountMembership)
@@ -190,4 +210,5 @@ def user_is_account_owner(user_id: int, account_id: int, session: Session) -> bo
         AccountMembership.account_id == account_id,
         AccountMembership.is_owner == True
     )
-    return session.exec(query).first() is not None
+    account = session.exec(query).first()
+    return account is not None
