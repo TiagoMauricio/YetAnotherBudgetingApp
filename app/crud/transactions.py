@@ -1,8 +1,7 @@
-from fastapi import HTTPException
 from sqlmodel import Session
 from app.models import Account, Transaction, User
 from app.crud import accounts as acc_crud
-from app.schemas.transactions import TransactionResponse
+from app.schemas.transactions import TransactionResponse, TransactionUpdate
 
 
 def find_transaction_by_id(transaction_id: int, session: Session) -> Transaction | None:
@@ -13,7 +12,7 @@ def create_transaction(
     transaction_data: TransactionResponse, user: User, session: Session
 ):
 
-    account: Account = acc_crud.get_account_by_id(
+    account: Account | None = acc_crud.get_account_by_id(
         transaction_data.account_id, user, session
     )
     new_transaction: Transaction = Transaction(
@@ -30,3 +29,14 @@ def create_transaction(
     session.refresh(new_transaction)
 
     return new_transaction
+
+
+def update_transaction(transaction_data: TransactionUpdate, user: User, session: Session) -> TransactionResponse | None:
+    transaction: Transaction | None = find_transaction_by_id(transaction_data.id, session)
+
+    update_data = transaction_data.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(transaction, field, value)
+
+    return TransactionUpdate.model_validate(transaction)
