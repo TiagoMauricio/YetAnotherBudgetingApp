@@ -1,6 +1,6 @@
 PYTHON=python3
 
-.PHONY: test install format lint clean venv help
+.PHONY: test install format lint clean venv help db-init
 
 # Run tests
 test:
@@ -36,14 +36,18 @@ clean:
 	find . -type d -name "__pycache__" -delete
 	find . -type d -name "*.egg-info" -exec rm -rf {} +
 
+# Setup db for manual testing
+db-init:
+	./src/init_db.sh
+
 # Show help
 help:
 	@echo "Available commands:"
 	@echo "  test        - Run tests"
 	@echo "  install     - Install production dependencies"
-	@echo "  dev-install - Install development dependencies"
 	@echo "  format      - Format code with Black"
 	@echo "  lint        - Check code formatting"
 	@echo "  venv        - Create virtual environment if it doesn't exist"
 	@echo "  clean       - Clean up cache files"
 	@echo "  help        - Show this help message"
+	@echo "  db-init     - Setup user for manual testing"
