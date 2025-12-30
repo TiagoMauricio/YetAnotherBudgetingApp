@@ -54,6 +54,12 @@ make install
 uvicorn app.main:app --reload
 ```
 
+4. Quickly setup a  user for manual testing
+
+```
+make db-init
+```
+
 ## Docker
 
 Build and run with Docker:

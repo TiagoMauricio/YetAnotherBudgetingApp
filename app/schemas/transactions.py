@@ -17,8 +17,3 @@ class TransactionResponse(BaseTransaction):
 
     account_id: int
 
-
-class TransactionUpdate(BaseTransaction):
-    """Base schema for transaction updates"""
-
-    id: int

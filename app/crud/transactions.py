@@ -1,7 +1,7 @@
 from sqlmodel import Session
 from app.models import Account, Transaction, User
 from app.crud import accounts as acc_crud
-from app.schemas.transactions import TransactionResponse, TransactionUpdate
+from app.schemas.transactions import BaseTransaction, TransactionResponse
 
 
 def find_transaction_by_id(transaction_id: int, session: Session) -> Transaction | None:
@@ -31,12 +31,22 @@ def create_transaction(
     return new_transaction
 
 
-def update_transaction(transaction_data: TransactionUpdate, user: User, session: Session) -> TransactionResponse | None:
-    transaction: Transaction | None = find_transaction_by_id(transaction_data.id, session)
+def update_transaction(transaction_id: int, transaction_data: BaseTransaction, session: Session) -> Transaction | None:
+    transaction: Transaction | None = find_transaction_by_id(transaction_id, session)
 
     update_data = transaction_data.model_dump(exclude_unset=True)
-
+    print("BEFORE UPDATE")
     for field, value in update_data.items():
+        print(field,value)
         setattr(transaction, field, value)
 
-    return TransactionUpdate.model_validate(transaction)
+    session.add(transaction)
+    session.commit()
+    session.refresh(transaction)
+    return transaction
+
+def delete_transaction(transaction_id: int, session: Session) -> bool:
+    transaction: Transaction | None = find_transaction_by_id(transaction_id, session)
+    session.delete(transaction)
+    session.commit()
+    return True
