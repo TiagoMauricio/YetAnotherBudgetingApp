@@ -9,7 +9,7 @@ def find_transaction_by_id(transaction_id: int, session: Session) -> Transaction
 
 
 def create_transaction(
-    transaction_data: TransactionResponse, user: User, session: Session
+    transaction_data: BaseTransaction, user: User, session: Session
 ):
 
     account: Account | None = acc_crud.get_account_by_id(

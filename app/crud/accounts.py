@@ -54,7 +54,7 @@ def get_account_by_id(account_id: int, user: User, session: Session) -> Account 
     # then check if user has access to it
     user_accounts = get_accounts_by_user(user_id=user.id, session=session)
     if account_id not in [acc.id for acc in user_accounts]:
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN)
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="You don't have access to this account")
     return session.get(Account, account_id)
 
 

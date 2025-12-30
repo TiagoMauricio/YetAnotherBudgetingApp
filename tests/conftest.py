@@ -52,7 +52,7 @@ def client_fixture(session: Session):
 
 
 @pytest.fixture(scope="module", name="user")
-def userCreated(client: TestClient):
+def user_created(client: TestClient):
 
     test_password = "testpassword123"
     user_data = {
@@ -67,7 +67,15 @@ def userCreated(client: TestClient):
 
 
 @pytest.fixture(scope="module", name="token")
-def jwtToken(client: TestClient, user):
+def jwt_token(client: TestClient, user):
 
     token = create_access_token(data={"sub": user["email"]})
     yield token
+
+
+@pytest.fixture(scope="module", name="account")
+def create_account(client: TestClient, token: str):
+    headers = Helpers.get_bearer_headers(token)
+    payload = {"name": "string", "currency_code": "str", "description": "string"}
+    account = client.post("api/accounts", headers=headers, json=payload)
+    yield account.json()

@@ -41,7 +41,7 @@ async def get_transaction(
 
 @router.post("", response_model=TransactionResponse, status_code=status.HTTP_201_CREATED)
 async def create_transaction(
-    transaction_data: TransactionResponse,
+    transaction_data: BaseTransaction,
     user: Annotated[str, Depends(get_current_user)],
     session: Session = Depends(get_session),
 ) -> Transaction:
