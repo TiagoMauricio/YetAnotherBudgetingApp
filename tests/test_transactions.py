@@ -34,7 +34,7 @@ def test_get_create_transaction(helpers: type[Helpers], client: TestClient, toke
     response_get: Response = client.get(url=f"{API_URL}/{response_create_data["id"]}", headers=headers)
     print(f"{API_URL}/{response_create_data["id"]}")
     response_get_data = response_get.json()
-    assert response.status_code == 200
+    assert response_get.status_code == 200
 
     assert response_get_data["id"] == response_create_data["id"]
     assert response_get_data["account_id"] == account["id"]
