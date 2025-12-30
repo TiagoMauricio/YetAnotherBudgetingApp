@@ -2,12 +2,18 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class TransactionResponse(BaseModel):
-    """Base schema for transactions"""
+class BaseTransaction(BaseModel):
+    """Base schema for transacitons"""
 
-    account_id: int
     category_id: int
     type: str
     amount: float
     description: str
     date: datetime
+
+
+class TransactionResponse(BaseTransaction):
+    """Base schema for transaction responses"""
+
+    account_id: int
+
