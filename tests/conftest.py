@@ -16,6 +16,18 @@ class Helpers:
         headers = {"Authorization": f"Bearer {bearer_token}"}
         return headers
 
+    @staticmethod
+    def transaction_payload():
+        payload: dict[str, str | int] = {
+            "category_id": 1,
+            "type": "income",
+            "amount": 25,
+            "description": "Test Income",
+            "date": "2025-12-30",
+            "account_id": 1,
+        }
+        return payload
+
 
 @pytest.fixture
 def helpers():

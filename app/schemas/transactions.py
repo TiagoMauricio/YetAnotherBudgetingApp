@@ -1,6 +1,5 @@
 from pydantic import BaseModel
-from datetime import date
-
+import datetime
 
 class BaseTransaction(BaseModel):
     """Base schema for transacitons"""
@@ -10,7 +9,7 @@ class BaseTransaction(BaseModel):
     type: str
     amount: float
     description: str
-    date: date
+    date: datetime.date
 
 
 class TransactionResponse(BaseTransaction):
@@ -18,4 +17,12 @@ class TransactionResponse(BaseTransaction):
 
     id: int
 
+class TransactionUpdate(BaseModel):
+    """Schema for transaction updates"""
 
+    category_id: int | None = None
+    type: str | None = None
+    amount: float | None = None
+    description: str | None = None
+    # python was complaining that date by itself was a variable, idk why
+    date: datetime.date | None = None
