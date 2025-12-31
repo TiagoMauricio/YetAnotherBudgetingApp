@@ -1,3 +1,4 @@
+import datetime
 from fastapi import HTTPException
 from sqlmodel import Session, select
 from collections.abc import Sequence
@@ -214,3 +215,12 @@ def user_is_account_owner(user_id: int, account_id: int, session: Session) -> bo
     )
     account = session.exec(query).first()
     return account is not None
+
+
+def get_account_transactions(
+    user_id: int, account_id: int, from_date: datetime.date, to_date: datetime.date
+):
+    if not user_has_account_access(user_id, account_id):
+        raise
+
+

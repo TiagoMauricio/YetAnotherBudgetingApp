@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
-from starlette.status import HTTP_200_OK
 from app.database import get_session
 from app.schemas.accounts import AccountBase, AccountUpdate, Account as AccountResponse
+from app.schemas.transactions import TransactionResponse
 import app.crud.accounts as account_crud
 from app.utils.dependencies import get_current_user
+import datetime
+import app.utils.datetime as date_utils
 
 from typing import Annotated
 
@@ -21,7 +23,9 @@ async def get_all_accounts(
     return accounts
 
 
-@router.get("/{account_id}", status_code=HTTP_200_OK, response_model=AccountResponse)
+@router.get(
+    "/{account_id}", status_code=status.HTTP_200_OK, response_model=AccountResponse
+)
 async def get_account_by_id(
     user: Annotated[str, Depends(get_current_user)],
     account_id: int,
@@ -42,7 +46,7 @@ async def create_account_endpoint(
 
 
 @router.patch(
-    path="/{account_id}", status_code=HTTP_200_OK, response_model=AccountResponse
+    path="/{account_id}", status_code=status.HTTP_200_OK, response_model=AccountResponse
 )
 async def update_account(
     account_id: int,
@@ -52,3 +56,24 @@ async def update_account(
 ):
     account = account_crud.update_account(account_id, account_data, user, session)
     return account
+
+
+@router.get(
+    path="/{account_id}/transactions",
+    status_code=status.HTTP_200_OK,
+    response_model=TransactionResponse,
+)
+async def get_account_transactions(
+    account_id: int,
+    user: Annotated[str, Depends(get_current_user)],
+    session: Session = Depends(get_session),
+    from_date: datetime.date | None = None,
+    to_date: datetime.date | None = None,
+):
+    if not from_date or not to_date:
+        from_date: datetime.date = date_utils.first_day_of_month()
+        to_date: datetime.date = date_utils.last_day_of_month()
+    transactions = account_crud.get_account_transactions(
+        user.id, account_id, from_date, to_date
+    )
+    return transactions
