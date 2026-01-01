@@ -1,8 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import create_db_and_tables
 from app.routes.main import api_router
 from contextlib import asynccontextmanager
+import app.utils.exceptions as err
 
 
 @asynccontextmanager
@@ -38,3 +40,25 @@ async def health_check():
 
 # Include routers
 app.include_router(api_router, prefix="/api")
+
+
+# Exception Handlers
+# Need to be here, not sure if they can be put somewhere else
+@app.exception_handler(err.OperationNotPermitedException)
+async def operation_not_permited(
+    request: Request, exc: err.OperationNotPermitedException
+) -> JSONResponse:
+    return JSONResponse(status_code=403, content={"message": exc.message})
+
+
+@app.exception_handler(err.EntityNotFoundException)
+async def not_found_exception(
+    request: Request, exc: err.EntityNotFoundException
+) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"message": exc.message})
+
+@app.exception_handler(err.PexaBadRequestException)
+async def not_found_exception(
+    request: Request, exc: err.PexaBadRequestException
+) -> JSONResponse:
+    return JSONResponse(status_code=400, content={"message": exc.message})

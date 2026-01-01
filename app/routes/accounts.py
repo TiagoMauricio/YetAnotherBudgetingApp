@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 from app.database import get_session
 from app.schemas.accounts import AccountBase, AccountUpdate, Account as AccountResponse
@@ -7,10 +7,13 @@ import app.crud.accounts as account_crud
 from app.utils.dependencies import get_current_user
 import datetime
 import app.utils.datetime as date_utils
-
+from collections.abc import Sequence
 from typing import Annotated
+from app.models import Transaction
+import app.utils.messages as messages
+import app.utils.exceptions as err
 
-router = APIRouter()
+router: APIRouter = APIRouter()
 
 
 @router.get("", response_model=list[AccountResponse])
@@ -58,10 +61,11 @@ async def update_account(
     return account
 
 
+# TODO: This endpoint will need pagination!
 @router.get(
     path="/{account_id}/transactions",
     status_code=status.HTTP_200_OK,
-    response_model=TransactionResponse,
+    response_model=Sequence[TransactionResponse],
 )
 async def get_account_transactions(
     account_id: int,
@@ -69,11 +73,14 @@ async def get_account_transactions(
     session: Session = Depends(get_session),
     from_date: datetime.date | None = None,
     to_date: datetime.date | None = None,
-):
-    if not from_date or not to_date:
+) -> Sequence[Transaction]:
+    if not from_date and to_date or from_date and not to_date:
+        raise err.PexaBadRequestException(message=messages.REQUIRED_DATE_RANGE)
+    if not from_date:
         from_date: datetime.date = date_utils.first_day_of_month()
+    if not to_date:
         to_date: datetime.date = date_utils.last_day_of_month()
-    transactions = account_crud.get_account_transactions(
-        user.id, account_id, from_date, to_date
+    transactions: Sequence[Transaction] = account_crud.get_account_transactions(
+        user.id, account_id, from_date, to_date, session
     )
     return transactions

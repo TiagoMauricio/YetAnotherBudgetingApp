@@ -8,8 +8,11 @@ from starlette.status import (
     HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND,
 )
-from app.models import Account, AccountMembership, User
+from app.models import Account, AccountMembership, User, Transaction
 from app.schemas.accounts import AccountBase, AccountUpdate
+from app.schemas.transactions import TransactionResponse
+from app.utils.exceptions import OperationNotPermitedException
+import app.utils.messages as utils_msg
 
 
 def get_all_accounts(session: Session) -> Sequence[Account]:
@@ -218,9 +221,24 @@ def user_is_account_owner(user_id: int, account_id: int, session: Session) -> bo
 
 
 def get_account_transactions(
-    user_id: int, account_id: int, from_date: datetime.date, to_date: datetime.date
-):
-    if not user_has_account_access(user_id, account_id):
-        raise
+    user_id: int,
+    account_id: int,
+    from_date: datetime.date,
+    to_date: datetime.date,
+    session: Session,
+) -> Sequence[Transaction]:
+    if not user_has_account_access(user_id, account_id, session):
+        raise OperationNotPermitedException(
+            message=utils_msg.USER_HAS_NO_ACCOUNT_ACCESS
+        )
 
+    print(from_date, to_date)
+    statement: SelectOfScalar[Transaction] = (
+        select(Transaction)
+        .where(Transaction.date >= from_date)
+        .where(Transaction.date <= to_date)
+    )
 
+    results: Sequence[Transaction] = session.exec(statement).all()
+    print(results)
+    return results
