@@ -74,6 +74,8 @@ async def get_account_transactions(
     from_date: datetime.date | None = None,
     to_date: datetime.date | None = None,
 ) -> Sequence[Transaction]:
+    # Fail the request when one of the date ranges is set
+    # and the other isnt
     if (not from_date and to_date) or (from_date and not to_date):
         raise err.BadRequestException(message=messages.REQUIRED_DATE_RANGE)
     start_date: datetime.date = from_date or date_utils.first_day_of_month()
