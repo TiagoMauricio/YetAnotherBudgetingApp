@@ -45,21 +45,20 @@ app.include_router(api_router, prefix="/api")
 # Exception Handlers
 # Need to be here, not sure if they can be put somewhere else
 @app.exception_handler(err.OperationNotPermitedException)
-async def operation_not_permited(
+async def operation_not_permited_handler(
     request: Request, exc: err.OperationNotPermitedException
 ) -> JSONResponse:
     return JSONResponse(status_code=403, content={"message": exc.message})
 
 
 @app.exception_handler(err.EntityNotFoundException)
-async def not_found_exception(
+async def not_found_handler(
     request: Request, exc: err.EntityNotFoundException
 ) -> JSONResponse:
     return JSONResponse(status_code=404, content={"message": exc.message})
 
-
 @app.exception_handler(err.BadRequestException)
-async def not_found_exception(
+async def bad_request_handler(
     request: Request, exc: err.BadRequestException
 ) -> JSONResponse:
     return JSONResponse(status_code=400, content={"message": exc.message})
