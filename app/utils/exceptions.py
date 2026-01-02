@@ -13,7 +13,7 @@ class OperationNotPermitedException(PexaException):
     pass
 
 
-class PexaBadRequestException(PexaException):
+class BadRequestException(PexaException):
     """Exception to raise instead of HTTPException 400"""
 
     pass

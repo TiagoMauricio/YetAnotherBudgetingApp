@@ -75,7 +75,7 @@ async def get_account_transactions(
     to_date: datetime.date | None = None,
 ) -> Sequence[Transaction]:
     if not from_date and to_date or from_date and not to_date:
-        raise err.PexaBadRequestException(message=messages.REQUIRED_DATE_RANGE)
+        raise err.BadRequestException(message=messages.REQUIRED_DATE_RANGE)
     if not from_date:
         from_date: datetime.date = date_utils.first_day_of_month()
     if not to_date:

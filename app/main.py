@@ -57,8 +57,9 @@ async def not_found_exception(
 ) -> JSONResponse:
     return JSONResponse(status_code=404, content={"message": exc.message})
 
-@app.exception_handler(err.PexaBadRequestException)
+
+@app.exception_handler(err.BadRequestException)
 async def not_found_exception(
-    request: Request, exc: err.PexaBadRequestException
+    request: Request, exc: err.BadRequestException
 ) -> JSONResponse:
     return JSONResponse(status_code=400, content={"message": exc.message})
