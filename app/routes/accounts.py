@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 from app.database import get_session
 from app.schemas.accounts import AccountBase, AccountUpdate, Account as AccountResponse
@@ -9,7 +9,7 @@ import datetime
 import app.utils.datetime as date_utils
 from collections.abc import Sequence
 from typing import Annotated
-from app.models import Transaction
+from app.models import Transaction, User
 import app.utils.messages as messages
 import app.utils.exceptions as err
 
@@ -69,18 +69,16 @@ async def update_account(
 )
 async def get_account_transactions(
     account_id: int,
-    user: Annotated[str, Depends(get_current_user)],
+    user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
     from_date: datetime.date | None = None,
     to_date: datetime.date | None = None,
 ) -> Sequence[Transaction]:
-    if not from_date and to_date or from_date and not to_date:
+    if (not from_date and to_date) or (from_date and not to_date):
         raise err.BadRequestException(message=messages.REQUIRED_DATE_RANGE)
-    if not from_date:
-        from_date: datetime.date = date_utils.first_day_of_month()
-    if not to_date:
-        to_date: datetime.date = date_utils.last_day_of_month()
+    start_date: datetime.date = from_date or date_utils.first_day_of_month()
+    end_date: datetime.date = to_date or date_utils.last_day_of_month()
     transactions: Sequence[Transaction] = account_crud.get_account_transactions(
-        user.id, account_id, from_date, to_date, session
+        user.id, account_id, start_date, end_date, session
     )
     return transactions
