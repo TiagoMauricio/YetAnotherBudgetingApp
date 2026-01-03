@@ -16,15 +16,15 @@ import app.utils.exceptions as err
 router: APIRouter = APIRouter()
 
 
-@router.get(path="", status_code=status.HTTP_204_NO_CONTENT, response_model=list[AccountResponse])
+@router.get(path="", response_model=list[AccountResponse])
 async def get_all_accounts(
     user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
 ) -> Sequence[Account] | None:
-    #accounts: Sequence[Account] = account_crud.get_user_owned_accounts(
+    # accounts: Sequence[Account] = account_crud.get_user_owned_accounts(
     #    user_id=user.id, session=session
-    #)
-    return
+    # )
+    return []
 
 
 @router.get(path="/{account_id}", response_model=AccountResponse)
