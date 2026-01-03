@@ -9,7 +9,7 @@ import datetime
 import app.utils.datetime as date_utils
 from collections.abc import Sequence
 from typing import Annotated
-from app.models import Transaction, User
+from app.models import Transaction, User, Account
 import app.utils.messages as messages
 import app.utils.exceptions as err
 
@@ -18,11 +18,10 @@ router: APIRouter = APIRouter()
 
 @router.get(path="", response_model=list[AccountResponse])
 async def get_all_accounts(
-    token: Annotated[str, Depends(get_current_user)],
+    user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
-):
-    # TODO: lock this endpoint to user accounts only
-    accounts = account_crud.get_all_accounts(session)
+) -> Sequence[Account]:
+    accounts: Sequence[Account] = account_crud.get_user_owned_accounts(user_id=user.id, session=session)
     return accounts
 
 
@@ -30,21 +29,21 @@ async def get_all_accounts(
    path="/{account_id}", response_model=AccountResponse
 )
 async def get_account_by_id(
-    user: Annotated[str, Depends(get_current_user)],
+    user: Annotated[User, Depends(get_current_user)],
     account_id: int,
     session: Session = Depends(get_session),
-):
-    account = account_crud.get_account_by_id(account_id, user, session)
+) -> Account | None:
+    account: Account | None = account_crud.get_account_by_id(account_id, user, session)
     return account
 
 
 @router.post(path="", status_code=status.HTTP_201_CREATED, response_model=AccountResponse)
 async def create_account_endpoint(
     account_data: AccountBase,
-    user: Annotated[str, Depends(get_current_user)],
+    user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
-):
-    new_account = account_crud.create_account(account_data, user, session)
+) -> Account:
+    new_account: Account = account_crud.create_account(account_data, user, session)
     return new_account
 
 
@@ -54,10 +53,10 @@ async def create_account_endpoint(
 async def update_account(
     account_id: int,
     account_data: AccountUpdate,
-    user: Annotated[str, Depends(get_current_user)],
+    user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
-):
-    account = account_crud.update_account(account_id, account_data, user, session)
+) -> Account | None:
+    account: Account | None = account_crud.update_account(account_id, account_data, user, session)
     return account
 
 
