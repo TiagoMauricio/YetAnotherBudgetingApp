@@ -8,6 +8,7 @@ set -e
 BASE_URL="http://localhost:8000"
 EMAIL="user@example.com"
 PASSWORD="password123"
+TODAY=`date '+%Y-%m-%d'`
 
 echo "==> Registering user..."
 curl -s -X POST "$BASE_URL/api/auth/register" \
@@ -53,7 +54,7 @@ curl -s -X POST "$BASE_URL/api/transactions" \
     \"type\": \"expense\",
     \"amount\": 25.50,
     \"description\": \"Coffee\",
-    \"date\": \"2024-01-01T12:00:00Z\"
+    \"date\": \"$TODAY\"
   }" > /dev/null
 
 echo "Transaction created"

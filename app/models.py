@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date as _date
 from sqlmodel import SQLModel, Field, Relationship
 
 
@@ -27,7 +27,7 @@ class Transaction(SQLModel, table=True):
     type: str = Field(regex="^(income|expense)$")
     amount: float
     description: str | None = None
-    date: datetime
+    date: _date
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
 
