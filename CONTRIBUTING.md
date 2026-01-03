@@ -46,4 +46,54 @@ Files:
 
 ## Data Model
 
-[WIP]
+erDiagram
+    USER ||--o{ REFRESH_TOKEN : "has"
+    USER ||--o{ ACCOUNT_MEMBERSHIP : "belongs to"
+    ACCOUNT ||--o{ ACCOUNT_MEMBERSHIP : "has members"
+    ACCOUNT ||--o{ TRANSACTION : "contains"
+    ACCOUNT ||--o{ CATEGORY : "defines"
+    CURRENCY ||--o{ ACCOUNT : "used by"
+    CATEGORY ||--o{ TRANSACTION : "classifies"
+    USER ||--o{ TRANSACTION : "manages"
+
+    USER {
+        int id PK
+        string email
+        string password_hash
+        string name
+        datetime created_at
+        datetime updated_at
+        bool is_active
+        datetime last_login
+    }
+
+    ACCOUNT {
+        int id PK
+        string name
+        string currency_code FK
+        string description
+    }
+
+    TRANSACTION {
+        int id PK
+        int account_id FK
+        int category_id FK
+        int user_id FK
+        string type "income/expense"
+        float amount
+        date date
+    }
+
+    CATEGORY {
+        int id PK
+        int account_id FK
+        string name
+        string type "income/expense"
+        bool is_default
+    }
+
+    CURRENCY {
+        string code PK
+        string name
+        string symbol
+    }
