@@ -46,6 +46,12 @@ Files:
 
 ## Data Model
 
+Here's a quick description of the relationships between the entities:
+
+* A person is represented by **User**. Each **User** can create multiple **Account**. An **Account** is a "collection" of **Transaction**. **User** can create multiple **Transaction** that have a **Category** and belong to a single **Account**. **User** have multiple **AccountMembership** for multiple **Account** but only one per **Account**. When a **User** creates an **Account**, an **AccountMembership** is also created with `is_owner` property.
+
+The intent of this diagram is to provide a visual aid to the entity relationships:
+
 ```mermaid
 erDiagram
     USER ||--o{ REFRESH_TOKEN : "has"
