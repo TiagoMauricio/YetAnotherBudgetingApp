@@ -21,13 +21,13 @@ async def get_all_accounts(
     user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
 ) -> Sequence[Account]:
-    accounts: Sequence[Account] = account_crud.get_user_owned_accounts(user_id=user.id, session=session)
+    accounts: Sequence[Account] = account_crud.get_user_owned_accounts(
+        user_id=user.id, session=session
+    )
     return accounts
 
 
-@router.get(
-   path="/{account_id}", response_model=AccountResponse
-)
+@router.get(path="/{account_id}", response_model=AccountResponse)
 async def get_account_by_id(
     user: Annotated[User, Depends(get_current_user)],
     account_id: int,
@@ -37,7 +37,9 @@ async def get_account_by_id(
     return account
 
 
-@router.post(path="", status_code=status.HTTP_201_CREATED, response_model=AccountResponse)
+@router.post(
+    path="", status_code=status.HTTP_201_CREATED, response_model=AccountResponse
+)
 async def create_account_endpoint(
     account_data: AccountBase,
     user: Annotated[User, Depends(get_current_user)],
@@ -56,7 +58,9 @@ async def update_account(
     user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
 ) -> Account | None:
-    account: Account | None = account_crud.update_account(account_id, account_data, user, session)
+    account: Account | None = account_crud.update_account(
+        account_id, account_data, user, session
+    )
     return account
 
 

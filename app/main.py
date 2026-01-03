@@ -57,6 +57,7 @@ async def not_found_handler(
 ) -> JSONResponse:
     return JSONResponse(status_code=404, content={"message": exc.message})
 
+
 @app.exception_handler(err.BadRequestException)
 async def bad_request_handler(
     request: Request, exc: err.BadRequestException
