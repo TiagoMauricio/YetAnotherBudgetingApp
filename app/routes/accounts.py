@@ -16,7 +16,7 @@ import app.utils.exceptions as err
 router: APIRouter = APIRouter()
 
 
-@router.get("", response_model=list[AccountResponse])
+@router.get(path="", response_model=list[AccountResponse])
 async def get_all_accounts(
     token: Annotated[str, Depends(get_current_user)],
     session: Session = Depends(get_session),
@@ -27,7 +27,7 @@ async def get_all_accounts(
 
 
 @router.get(
-    "/{account_id}", status_code=status.HTTP_200_OK, response_model=AccountResponse
+   path="/{account_id}", response_model=AccountResponse
 )
 async def get_account_by_id(
     user: Annotated[str, Depends(get_current_user)],
@@ -38,7 +38,7 @@ async def get_account_by_id(
     return account
 
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=AccountResponse)
+@router.post(path="", status_code=status.HTTP_201_CREATED, response_model=AccountResponse)
 async def create_account_endpoint(
     account_data: AccountBase,
     user: Annotated[str, Depends(get_current_user)],
