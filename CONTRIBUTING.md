@@ -46,6 +46,7 @@ Files:
 
 ## Data Model
 
+```mermaid
 erDiagram
     USER ||--o{ REFRESH_TOKEN : "has"
     USER ||--o{ ACCOUNT_MEMBERSHIP : "belongs to"
@@ -97,3 +98,5 @@ erDiagram
         string name
         string symbol
     }
+```
+
