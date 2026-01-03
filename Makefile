@@ -38,7 +38,7 @@ clean:
 
 # Setup db for manual testing
 db-init:
-	./src/init_db.sh
+	./bin/init_db.sh
 
 # Show help
 help:
@@ -50,4 +50,4 @@ help:
 	@echo "  venv        - Create virtual environment if it doesn't exist"
 	@echo "  clean       - Clean up cache files"
 	@echo "  help        - Show this help message"
-	@echo "  db-init     - Setup user for manual testing"
+	@echo "  db-init     - Setup user for manual testing (NOTE: needs api running)"
