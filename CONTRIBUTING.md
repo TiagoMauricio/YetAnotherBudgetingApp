@@ -106,3 +106,42 @@ erDiagram
     }
 ```
 
+## Handling exceptions
+
+To have uniform error handling, errors should be handled by raising a `[PexaException](https://github.com/TiagoMauricio/pexa/blob/main/app/utils/exceptions.py#L1)`. Use one of the classes that have super type of `PexaException` to throw errors.
+
+```python
+import app.utils.exceptions as err
+
+(...)
+
+if (not from_date and to_date) or (from_date and not to_date):
+        raise err.BadRequestException(message=messages.REQUIRED_DATE_RANGE)
+```
+
+In case the error you're trying to throw doesn't have a class that fits its description, create one of your own and add a handler (refer to [Issue #16](https://github.com/TiagoMauricio/pexa/issues/16#issuecomment-3706479729)).
+
+Exception example:
+
+```python
+# app/utils/exceptions.py
+(...)
+
+class NewException(PexaException):
+  """Description"""
+  pass
+```
+
+Handler example:
+```python
+# app/main.py
+(...)
+
+@app.exception_handler(err.NewException)
+async def bad_request_handler(
+    request: Request, exc: err.NewException
+) -> JSONResponse:
+    return JSONResponse(status_code=400, content={"message": exc.message})
+```
+
+Furthermore to help with consistency, leverage `app/utils/messages.py` to create strings to be reused when throwing your new exception.
