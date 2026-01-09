@@ -4,7 +4,7 @@ A self hostable API for personal expense tracking built with [FastAPI](https://g
 
 ## Context
 
-There are many great opensource options for personal finance tracking. However, I felt like they were either too feature full or lacking particular features I was looking for.
+There are many great Open Source options for personal finance tracking. However, I felt like they were either too feature full or lacking particular features I was looking for.
 Pexa strives to achieve a middle ground where it can track your personal finances and share the progress with your significant other so that multiple people can register expenses on the same account.
 
 :warning: This API is still in early stages of development.
@@ -13,7 +13,7 @@ Pexa strives to achieve a middle ground where it can track your personal finance
 
 Primary:
 
-* Simple expense tracking to allow client frontends to graph information in a simple way
+* Simple expense tracking to allow client front-ends to graph information in a simple way
 * Allow multiple users to record expenses in the same account (Great for couples)
 * Easy to self host
 
@@ -24,8 +24,8 @@ North star:
 
 ## Technology
 
-I chose FastAPI because python was my first language and since I'm not a backend engineer, I prefered to ignore the barrier of a new language to make it easier to progress.
-I've built a couple tools using Django and worked in a professional setting with Flask, so I wanted to learn a new framework and FastAPI seemed promissing.
+I chose FastAPI because python was my first language and since I'm not a back-end engineer, I preferred to ignore the barrier of a new language to make it easier to progress.
+I've built a couple tools using Django and worked in a professional setting with Flask, so I wanted to learn a new framework and FastAPI seemed promising.
 
 ## Contributing
 
@@ -36,7 +36,7 @@ If you wish to contribute:
 - Create an issue on this repo.
 - I have a Discord for my projects, I can add you to it.
 
-This is my first opensource project that I am looking for contributions for and I am still learning how to manage this :blush:
+This is my first Open Source project that I am looking for contributions for and I am still learning how to manage this :blush:
 
 ## Setup
 
@@ -65,9 +65,15 @@ make db-init
 Build and run with Docker:
 
 ```sh
-docker build -t budget-app .
-docker run -p 8000:8000 --env-file .env budget-app
+cd pexa
+docker build -t pexa .
+docker run -p 8000:8000 \
+  -v $(pwd)/.env:/app/.env \
+  -v $(pwd)/db.sqlite3:/app/db.sqlite3 \
+  pexa
+
 ```
+**NOTE**: make sure to have `.env` on the directory you're running the docker command on. This will also create a database file if it doesn't exist.
 
 ## Running Tests
 
