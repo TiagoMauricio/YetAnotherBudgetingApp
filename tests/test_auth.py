@@ -43,7 +43,7 @@ def test_create_user_duplicate_email(client: TestClient):
     response2 = client.post("/api/auth/register", json=user_data)
 
     assert response2.status_code == 400
-    assert "User with this email already exists" in response2.json()["detail"]
+    assert "User with this email already exists" in response2.json()["message"]
 
 
 def test_create_user_invalid_email(client: TestClient):

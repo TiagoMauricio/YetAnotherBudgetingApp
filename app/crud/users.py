@@ -1,9 +1,9 @@
 from sqlmodel import Session, select
-from app.database import get_session
+
 from app.models import User
 from app.schemas.users import UserCreate
+from app.utils.exceptions import exceptions as err
 from app.utils.security import hash_password
-from fastapi import Depends, HTTPException
 
 
 def find_user_by_email(email: str, session: Session):
@@ -35,7 +35,7 @@ def find_all_users(session: Session):
 def update_user(user_id: int, user_data: UserCreate, session: Session):
     user = find_user_by_id(user_id, session)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise err.EntityNotFoundException("User not found")
     user.name = user_data.name
     if user_data.password:
         user.password_hash = hash_password(user_data.password)

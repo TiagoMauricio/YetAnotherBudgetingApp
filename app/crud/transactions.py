@@ -1,15 +1,17 @@
 from sqlmodel import Session
-from app.models import Account, Transaction, User
+
 from app.crud import accounts as acc_crud
+from app.models import Account, Transaction, User
 from app.schemas.transactions import BaseTransaction, TransactionUpdate
 
 
 def find_transaction_by_id(transaction_id: int, session: Session) -> Transaction | None:
-    return session.get(Transaction, transaction_id)
+    t = session.get(Transaction, transaction_id)
+    print(t)
+    return t
 
 
 def create_transaction(transaction_data: BaseTransaction, user: User, session: Session):
-
     account: Account | None = acc_crud.get_account_by_id(
         transaction_data.account_id, user, session
     )

@@ -1,23 +1,24 @@
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
 
-from typing import Annotated
-
-from app.database import get_session
 import app.crud.users as user_crud
-from app.schemas.users import UserCreate, User as UserResponse
+from app.database import get_session
 from app.schemas.token import Token, TokenRefresh
+from app.schemas.users import User as UserResponse
+from app.schemas.users import UserCreate
+from app.utils.dependencies import get_current_user
+from app.utils.exceptions import exceptions as err
 from app.utils.security import (
-    verify_password,
     create_access_token,
     create_refresh_token,
-    verify_refresh_token,
     revoke_refresh_token,
+    verify_password,
+    verify_refresh_token,
 )
-
-from app.utils.dependencies import get_current_user
 
 router = APIRouter(tags=["authentication"])
 
@@ -41,9 +42,8 @@ async def register_user(
     # Check if user with this email already exists
     existing_user = user_crud.find_user_by_email(user_data.email, session)
     if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this email already exists",
+        raise err.BadRequestException(
+            "User with this email already exists",
         )
 
     # Create new user
@@ -67,11 +67,7 @@ async def login(
     """
     user = authenticate_user(form_data.username, form_data.password, session)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise err.AuthenticationMissingException("Incorrect email or password")
 
     # Update last login timestamp
     user.last_login = datetime.now()
@@ -110,12 +106,8 @@ async def refresh_token(
         return Token(
             access_token=access_token, refresh_token=refresh_token, token_type="bearer"
         )
-    except HTTPException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid refresh token",
-            headers={"WWW-Authenticate": "Bearer"},
-        ) from exc
+    except Exception as exc:
+        raise err.BadRequestException("Invalid refresh token") from exc
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
@@ -133,9 +125,5 @@ async def logout(
         # client should remove JWT token after this call
         revoke_refresh_token(token=refresh_token, db=session)
 
-    except HTTPException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid refresh token",
-            headers={"WWW-Authenticate": "Bearer"},
-        ) from exc
+    except Exception as exc:
+        raise err.BadRequestException("Invalid refresh token") from exc

@@ -1,17 +1,20 @@
-from venv import create
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Annotated
+
+from fastapi import APIRouter, Depends
 from sqlmodel import Session
 from starlette import status
+
+from app.crud import accounts as acc_crud
+from app.crud import transactions as t_crud
 from app.database import get_session
-from app.utils.dependencies import get_current_user
+from app.models import Transaction
 from app.schemas.transactions import (
-    TransactionResponse,
     BaseTransaction,
+    TransactionResponse,
     TransactionUpdate,
 )
-from app.crud import transactions as t_crud, accounts as acc_crud
-from app.models import Transaction
-from typing import Annotated
+from app.utils.dependencies import get_current_user
+from app.utils.exceptions import exceptions as err
 
 router = APIRouter(tags=["transactions"])
 
@@ -26,19 +29,20 @@ async def get_transaction(
     user: Annotated[str, Depends(get_current_user)],
     session: Session = Depends(get_session),
 ) -> Transaction | None:
-    transaction: Transaction | None = t_crud.find_transaction_by_id(
-        transaction_id, session
-    )
+    try:
+        transaction: Transaction | None = t_crud.find_transaction_by_id(
+            transaction_id, session
+        )
+    except Exception as e:
+        raise err.UnknownException("Something unexpected happened.") from e
+
     # TODO: change responsibility of throwing errors
     # to crud function
     if not transaction:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Transaction does not exist."
-        )
+        raise err.EntityNotFoundException("Transaction does not exist.")
     elif not acc_crud.user_has_account_access(user.id, transaction.account_id, session):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have access to this account.",
+        raise err.OperationNotPermitedException(
+            "You do not have access to this account."
         )
     return transaction
 
@@ -68,14 +72,9 @@ async def update_transaction(
         transaction_id, session
     )
     if not transaction:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found"
-        )
+        raise err.EntityNotFoundException("Transaction not found")
     if not acc_crud.user_has_account_access(user.id, transaction.account_id, session):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User does not have acccess to account.",
-        )
+        raise err.EntityNotFoundException("User does not have acccess to account.")
     updated_transaction: Transaction | None = t_crud.update_transaction(
         transaction_id, transaction_data, session
     )
@@ -92,17 +91,13 @@ async def delete_transaction(
         transaction_id, session
     )
     if not transaction:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found"
-        )
+        raise err.EntityNotFoundException("Transaction not found")
     if not acc_crud.user_has_account_access(user.id, transaction.account_id, session):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User does not have acccess to account.",
+        raise err.OperationNotPermitedException(
+            "User does not have acccess to account."
         )
     deleted_transaction: bool = t_crud.delete_transaction(transaction_id, session)
     if not deleted_transaction:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Something went wrong while trying to delete transaction.",
+        raise err.UnknownException(
+            "Something went wrong while trying to delete transaction."
         )

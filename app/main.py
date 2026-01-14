@@ -1,10 +1,11 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.database import create_db_and_tables
 from app.routes.main import api_router
-from contextlib import asynccontextmanager
-import app.utils.exceptions as err
+from app.utils.exceptions import exceptions, handlers
 
 
 @asynccontextmanager
@@ -43,23 +44,21 @@ app.include_router(api_router, prefix="/api")
 
 
 # Exception Handlers
-# Need to be here, not sure if they can be put somewhere else
-@app.exception_handler(err.OperationNotPermitedException)
-async def operation_not_permited_handler(
-    request: Request, exc: err.OperationNotPermitedException
-) -> JSONResponse:
-    return JSONResponse(status_code=403, content={"message": exc.message})
-
-
-@app.exception_handler(err.EntityNotFoundException)
-async def not_found_handler(
-    request: Request, exc: err.EntityNotFoundException
-) -> JSONResponse:
-    return JSONResponse(status_code=404, content={"message": exc.message})
-
-
-@app.exception_handler(err.BadRequestException)
-async def bad_request_handler(
-    request: Request, exc: err.BadRequestException
-) -> JSONResponse:
-    return JSONResponse(status_code=400, content={"message": exc.message})
+# not sure if I like this or not
+# TODO: Check in a few weeks
+exception_handler_pairs = [
+    (exceptions.OperationNotPermitedException, handlers.operation_not_permited_handler),
+    (exceptions.EntityNotFoundException, handlers.not_found_handler),
+    (exceptions.BadRequestException, handlers.bad_request_handler),
+    (exceptions.UnknownException, handlers.unknown_exception_handler),
+    (
+        exceptions.PasswordVerificationException,
+        handlers.password_verification_exception_handler,
+    ),
+    (
+        exceptions.AuthenticationMissingException,
+        handlers.authentication_missing_exception_handler,
+    ),
+]
+for pair in exception_handler_pairs:
+    app.add_exception_handler(pair[0], pair[1])
