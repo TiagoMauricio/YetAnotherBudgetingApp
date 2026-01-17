@@ -41,9 +41,7 @@ async def get_transaction(
     if not transaction:
         raise err.EntityNotFoundException("Transaction does not exist.")
     elif not acc_crud.user_has_account_access(user.id, transaction.account_id, session):
-        raise err.OperationNotPermitedException(
-            "You do not have access to this account."
-        )
+        raise err.NotPermitedException("You do not have access to this account.")
     return transaction
 
 
@@ -93,9 +91,7 @@ async def delete_transaction(
     if not transaction:
         raise err.EntityNotFoundException("Transaction not found")
     if not acc_crud.user_has_account_access(user.id, transaction.account_id, session):
-        raise err.OperationNotPermitedException(
-            "User does not have acccess to account."
-        )
+        raise err.NotPermitedException("User does not have acccess to account.")
     deleted_transaction: bool = t_crud.delete_transaction(transaction_id, session)
     if not deleted_transaction:
         raise err.UnknownException(

@@ -47,7 +47,7 @@ app.include_router(api_router, prefix="/api")
 # not sure if I like this or not
 # TODO: Check in a few weeks
 exception_handler_pairs = [
-    (exceptions.OperationNotPermitedException, handlers.operation_not_permited_handler),
+    (exceptions.NotPermitedException, handlers.operation_not_permited_handler),
     (exceptions.EntityNotFoundException, handlers.not_found_handler),
     (exceptions.BadRequestException, handlers.bad_request_handler),
     (exceptions.UnknownException, handlers.unknown_exception_handler),

@@ -10,7 +10,7 @@ class EntityNotFoundException(PexaException):
     pass
 
 
-class OperationNotPermitedException(PexaException):
+class NotPermitedException(PexaException):
     """Exception to raise instead of HTTPException 403"""
 
     pass

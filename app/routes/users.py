@@ -37,7 +37,7 @@ async def get_user_accounts(
     """Get user accounts"""
 
     if not user_id == user.id:
-        raise err.OperationNotPermitedException(message=messages.RESOURCE_ACCESS_DENIED)
+        raise err.NotPermitedException(message=messages.RESOURCE_ACCESS_DENIED)
     accounts: Sequence[Account] = acc_crud.get_user_owned_accounts(
         user_id=user_id, session=session
     )

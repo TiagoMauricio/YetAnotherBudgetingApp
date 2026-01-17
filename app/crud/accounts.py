@@ -52,7 +52,7 @@ def get_account_by_id(account_id: int, user: User, session: Session) -> Account 
     # then check if user has access to it
     user_accounts = get_accounts_by_user(user_id=user.id, session=session)
     if account_id not in [acc.id for acc in user_accounts]:
-        raise err.OperationNotPermitedException("You don't have access to this account")
+        raise err.NotPermitedException("You don't have access to this account")
     return session.get(Account, account_id)
 
 
@@ -86,7 +86,7 @@ def update_account(
     if not account:
         raise err.EntityNotFoundException("Account does not exist.")
     elif not user_is_account_owner(user.id, account_id, session):
-        raise err.OperationNotPermitedException("You do not own this account.")
+        raise err.NotPermitedException("You do not own this account.")
 
     update_data = account_data.model_dump(exclude_unset=True)
 
@@ -215,9 +215,7 @@ def get_account_transactions(
     session: Session,
 ) -> Sequence[Transaction]:
     if not user_has_account_access(user_id, account_id, session):
-        raise err.OperationNotPermitedException(
-            message=utils_msg.USER_HAS_NO_ACCOUNT_ACCESS
-        )
+        raise err.NotPermitedException(message=utils_msg.USER_HAS_NO_ACCOUNT_ACCESS)
 
     print(from_date, to_date)
     statement: SelectOfScalar[Transaction] = (

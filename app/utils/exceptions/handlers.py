@@ -5,7 +5,7 @@ from app.utils.exceptions import exceptions as err
 
 
 async def operation_not_permited_handler(
-    request: Request, exc: err.OperationNotPermitedException
+    request: Request, exc: err.NotPermitedException
 ) -> JSONResponse:
     return JSONResponse(status_code=403, content={"message": exc.message})
 
