@@ -7,7 +7,6 @@ from app.schemas.transactions import BaseTransaction, TransactionUpdate
 
 def find_transaction_by_id(transaction_id: int, session: Session) -> Transaction | None:
     t = session.get(Transaction, transaction_id)
-    print(t)
     return t
 
 
@@ -38,7 +37,6 @@ def update_transaction(
 
     update_data = transaction_data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
-        print(field, value)
         setattr(transaction, field, value)
 
     session.add(transaction)

@@ -217,7 +217,6 @@ def get_account_transactions(
     if not user_has_account_access(user_id, account_id, session):
         raise err.NotPermitedException(message=utils_msg.USER_HAS_NO_ACCOUNT_ACCESS)
 
-    print(from_date, to_date)
     statement: SelectOfScalar[Transaction] = (
         select(Transaction)
         .where(Transaction.date >= from_date)
@@ -225,5 +224,4 @@ def get_account_transactions(
     )
 
     results: Sequence[Transaction] = session.exec(statement).all()
-    print(results)
     return results
