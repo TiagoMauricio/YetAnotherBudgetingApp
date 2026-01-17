@@ -67,7 +67,7 @@ async def login(
     """
     user = authenticate_user(form_data.username, form_data.password, session)
     if not user:
-        raise err.AuthenticationMissingException("Incorrect email or password")
+        raise err.AuthenticationException("Incorrect email or password")
 
     # Update last login timestamp
     user.last_login = datetime.now()

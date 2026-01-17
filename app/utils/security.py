@@ -52,7 +52,7 @@ def create_access_token(data: dict[str, Any]) -> str:
 
 def verify_token(token: str) -> dict[str, Any]:
     """Verify JWT access token and return its payload"""
-    credentials_exception = err.AuthenticationMissingException(
+    credentials_exception = err.AuthenticationException(
         "Could not validate credentials"
     )
 
@@ -69,7 +69,7 @@ def verify_token(token: str) -> dict[str, Any]:
 
         return payload
     except jwt.ExpiredSignatureError:
-        raise err.AuthenticationMissingException("Access token has expired")
+        raise err.AuthenticationException("Access token has expired")
     except jwt.PyJWTError:
         raise credentials_exception
 
@@ -89,7 +89,7 @@ def create_refresh_token(data: dict[str, Any], user_id: int, db: Session) -> str
 
 def verify_refresh_token(token: str, db: Session) -> dict[str, Any]:
     """Verify refresh token and return its payload"""
-    credentials_exception = err.AuthenticationMissingException(
+    credentials_exception = err.AuthenticationException(
         "Invalid refresh token",
     )
 
@@ -107,7 +107,7 @@ def verify_refresh_token(token: str, db: Session) -> dict[str, Any]:
         return payload
     except jwt.ExpiredSignatureError:
         revoke_refresh_token(token=token, db=db)
-        raise err.AuthenticationMissingException("Refresh token has expired")
+        raise err.AuthenticationException("Refresh token has expired")
     except jwt.PyJWTError:
         raise credentials_exception
 

@@ -22,7 +22,7 @@ class BadRequestException(PexaException):
     pass
 
 
-class AuthenticationMissingException(PexaException):
+class AuthenticationException(PexaException):
     """Exception to raise instead of HTTPException 401"""
 
     pass

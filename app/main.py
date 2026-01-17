@@ -56,7 +56,7 @@ exception_handler_pairs = [
         handlers.password_verification_exception_handler,
     ),
     (
-        exceptions.AuthenticationMissingException,
+        exceptions.AuthenticationException,
         handlers.authentication_missing_exception_handler,
     ),
 ]

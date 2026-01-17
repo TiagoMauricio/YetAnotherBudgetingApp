@@ -35,6 +35,6 @@ async def password_verification_exception_handler(
 
 
 async def authentication_missing_exception_handler(
-    request: Request, exc: err.AuthenticationMissingException
+    request: Request, exc: err.AuthenticationException
 ) -> JSONResponse:
     return JSONResponse(status_code=401, content={"message": exc.message})
