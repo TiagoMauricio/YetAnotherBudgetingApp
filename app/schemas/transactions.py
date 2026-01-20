@@ -8,7 +8,6 @@ class BaseTransaction(BaseModel):
 
     account_id: int
     category_id: int
-    type: str
     amount: float
     description: str
     date: datetime.date
@@ -24,7 +23,6 @@ class TransactionUpdate(BaseModel):
     """Schema for transaction updates"""
 
     category_id: int | None = None
-    type: str | None = None
     amount: float | None = None
     description: str | None = None
     # python was complaining that date by itself was a variable, idk why

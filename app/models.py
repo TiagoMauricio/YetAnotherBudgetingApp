@@ -24,7 +24,6 @@ class Transaction(SQLModel, table=True):
     account_id: int = Field(foreign_key="account.id", nullable=False)
     category_id: int | None = Field(foreign_key="category.id")
     user_id: int | None = Field(foreign_key="user.id")
-    type: str = Field(regex="^(income|expense)$")
     amount: float
     description: str | None = None
     date: _date
@@ -36,7 +35,7 @@ class Category(SQLModel, table=True):
     id: int = Field(primary_key=True)
     account_id: int | None = Field(default=None, foreign_key="account.id")
     name: str
-    type: str = Field(regex="^(income|expense)$")
+    is_expense: bool
     is_default: bool = Field(default=False)
 
 

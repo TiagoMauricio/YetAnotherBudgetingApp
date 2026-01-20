@@ -51,7 +51,6 @@ curl -s -X POST "$BASE_URL/api/transactions" \
   -d "{
     \"account_id\": $ACCOUNT_ID,
     \"category_id\": 1,
-    \"type\": \"expense\",
     \"amount\": 25.50,
     \"description\": \"Coffee\",
     \"date\": \"$TODAY\"

@@ -18,7 +18,6 @@ def create_transaction(transaction_data: BaseTransaction, user: User, session: S
         account_id=account.id,
         category_id=transaction_data.category_id,
         user_id=user.id,
-        type=transaction_data.type,
         amount=transaction_data.amount,
         description=transaction_data.description,
         date=transaction_data.date,
