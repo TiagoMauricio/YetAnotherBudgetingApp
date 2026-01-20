@@ -1,18 +1,13 @@
 import datetime
-from fastapi import HTTPException
-from sqlmodel import Session, select
 from collections.abc import Sequence
+
+from sqlmodel import Session, select
 from sqlmodel.sql.expression import SelectOfScalar
-from starlette.status import (
-    HTTP_400_BAD_REQUEST,
-    HTTP_403_FORBIDDEN,
-    HTTP_404_NOT_FOUND,
-)
-from app.models import Account, AccountMembership, User, Transaction
-from app.schemas.accounts import AccountBase, AccountUpdate
-from app.schemas.transactions import TransactionResponse
-from app.utils.exceptions import OperationNotPermitedException
+
 import app.utils.messages as utils_msg
+from app.models import Account, AccountMembership, Transaction, User
+from app.schemas.accounts import AccountBase, AccountUpdate
+from app.utils.exceptions import exceptions as err
 
 
 def get_all_accounts(session: Session) -> Sequence[Account]:
@@ -28,9 +23,8 @@ def create_account(account: AccountBase, user: User, session: Session) -> Accoun
     user_accounts = get_accounts_by_user(user_id=user.id, session=session)
 
     if account.name in [acc.name for acc in user_accounts]:
-        raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
-            detail=f"You already have an account named: {account.name}",
+        raise err.BadRequestException(
+            f"You already have an account named: {account.name}"
         )
 
     new_account: Account = Account(
@@ -58,10 +52,7 @@ def get_account_by_id(account_id: int, user: User, session: Session) -> Account 
     # then check if user has access to it
     user_accounts = get_accounts_by_user(user_id=user.id, session=session)
     if account_id not in [acc.id for acc in user_accounts]:
-        raise HTTPException(
-            status_code=HTTP_403_FORBIDDEN,
-            detail="You don't have access to this account",
-        )
+        raise err.NotPermitedException("You don't have access to this account")
     return session.get(Account, account_id)
 
 
@@ -81,7 +72,7 @@ def get_user_owned_accounts(user_id: int, session: Session) -> Sequence[Account]
     query = (
         select(Account)
         .join(AccountMembership)
-        .where(AccountMembership.user_id == user_id, AccountMembership.is_owner == True)
+        .where(AccountMembership.user_id == user_id, AccountMembership.is_owner)
         .order_by(Account.created_at.desc())
     )
     return session.exec(query).all()
@@ -93,13 +84,9 @@ def update_account(
     """Update account details"""
     account = session.get(Account, account_id)
     if not account:
-        raise HTTPException(
-            status_code=HTTP_404_NOT_FOUND, detail="Account does not exist."
-        )
+        raise err.EntityNotFoundException("Account does not exist.")
     elif not user_is_account_owner(user.id, account_id, session):
-        raise HTTPException(
-            status_code=HTTP_403_FORBIDDEN, detail="You do not own this account."
-        )
+        raise err.NotPermitedException("You do not own this account.")
 
     update_data = account_data.model_dump(exclude_unset=True)
 
@@ -214,7 +201,7 @@ def user_is_account_owner(user_id: int, account_id: int, session: Session) -> bo
     query = select(AccountMembership).where(
         AccountMembership.user_id == user_id,
         AccountMembership.account_id == account_id,
-        AccountMembership.is_owner == True,
+        AccountMembership.is_owner,
     )
     account = session.exec(query).first()
     return account is not None
@@ -228,11 +215,8 @@ def get_account_transactions(
     session: Session,
 ) -> Sequence[Transaction]:
     if not user_has_account_access(user_id, account_id, session):
-        raise OperationNotPermitedException(
-            message=utils_msg.USER_HAS_NO_ACCOUNT_ACCESS
-        )
+        raise err.NotPermitedException(message=utils_msg.USER_HAS_NO_ACCOUNT_ACCESS)
 
-    print(from_date, to_date)
     statement: SelectOfScalar[Transaction] = (
         select(Transaction)
         .where(Transaction.date >= from_date)
@@ -240,5 +224,4 @@ def get_account_transactions(
     )
 
     results: Sequence[Transaction] = session.exec(statement).all()
-    print(results)
     return results

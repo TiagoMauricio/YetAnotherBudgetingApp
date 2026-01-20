@@ -1,17 +1,18 @@
+from collections.abc import Sequence
+from typing import Annotated
+
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
-from app.database import get_session
-from app.schemas.users import User as UserResponse
-from app.schemas.accounts import Account as AccountSchema
 
 # import app.crud.users as user_crud
 import app.crud.accounts as acc_crud
-from typing import Annotated
-from app.models import User, Account
-from collections.abc import Sequence
-from app.utils.dependencies import get_current_user
-from app.utils import exceptions as err
+from app.database import get_session
+from app.models import Account, User
+from app.schemas.accounts import Account as AccountSchema
+from app.schemas.users import User as UserResponse
 from app.utils import messages
+from app.utils.dependencies import get_current_user
+from app.utils.exceptions import exceptions as err
 
 router: APIRouter = APIRouter()
 
@@ -36,7 +37,7 @@ async def get_user_accounts(
     """Get user accounts"""
 
     if not user_id == user.id:
-        raise err.OperationNotPermitedException(message=messages.RESOURCE_ACCESS_DENIED)
+        raise err.NotPermitedException(message=messages.RESOURCE_ACCESS_DENIED)
     accounts: Sequence[Account] = acc_crud.get_user_owned_accounts(
         user_id=user_id, session=session
     )

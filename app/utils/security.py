@@ -1,16 +1,14 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
+import jwt
+from argon2 import PasswordHasher, exceptions
+from fastapi.security import OAuth2PasswordBearer
 from sqlmodel import Session, select
 
-import jwt
-from fastapi import HTTPException, status
-from argon2 import PasswordHasher, exceptions
-from app.models import RefreshToken
-
-from fastapi.security import OAuth2PasswordBearer
-
 from app.config import settings
+from app.models import RefreshToken
+from app.utils.exceptions import exceptions as err
 
 # Initialize Argon2 password hasher
 ph = PasswordHasher(
@@ -41,10 +39,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     except (exceptions.VerifyMismatchError, exceptions.InvalidHash):
         return False
     except exceptions.VerificationError:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error during password verification",
-        )
+        raise err.PasswordVerificationException("Error during password verification")
 
 
 def create_access_token(data: dict[str, Any]) -> str:
@@ -57,10 +52,8 @@ def create_access_token(data: dict[str, Any]) -> str:
 
 def verify_token(token: str) -> dict[str, Any]:
     """Verify JWT access token and return its payload"""
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
+    credentials_exception = err.AuthenticationException(
+        "Could not validate credentials"
     )
 
     try:
@@ -76,11 +69,7 @@ def verify_token(token: str) -> dict[str, Any]:
 
         return payload
     except jwt.ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Access token has expired",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise err.AuthenticationException("Access token has expired")
     except jwt.PyJWTError:
         raise credentials_exception
 
@@ -100,10 +89,8 @@ def create_refresh_token(data: dict[str, Any], user_id: int, db: Session) -> str
 
 def verify_refresh_token(token: str, db: Session) -> dict[str, Any]:
     """Verify refresh token and return its payload"""
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid refresh token",
-        headers={"WWW-Authenticate": "Bearer"},
+    credentials_exception = err.AuthenticationException(
+        "Invalid refresh token",
     )
 
     try:
@@ -120,11 +107,7 @@ def verify_refresh_token(token: str, db: Session) -> dict[str, Any]:
         return payload
     except jwt.ExpiredSignatureError:
         revoke_refresh_token(token=token, db=db)
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Refresh token has expired",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise err.AuthenticationException("Refresh token has expired")
     except jwt.PyJWTError:
         raise credentials_exception
 

@@ -111,7 +111,7 @@ erDiagram
 To have uniform error handling, errors should be handled by raising a [PexaException](https://github.com/TiagoMauricio/pexa/blob/main/app/utils/exceptions.py#L1). Use one of the classes that have super type of `PexaException` to throw errors.
 
 ```python
-import app.utils.exceptions as err
+from app.utils.exceptions import exceptions as err
 
 (...)
 
