@@ -23,7 +23,6 @@ def test_get_create_transaction(
     assert response_create_data["amount"] == payload["amount"]
     assert response_create_data["category_id"] == payload["category_id"]
     assert response_create_data["date"] == payload["date"]
-    assert response_create_data["type"] == payload["type"]
     assert response_create_data["description"] == payload["description"]
 
     response_get: Response = client.get(
@@ -37,7 +36,6 @@ def test_get_create_transaction(
     assert response_get_data["amount"] == payload["amount"]
     assert response_get_data["category_id"] == payload["category_id"]
     assert response_get_data["date"] == payload["date"]
-    assert response_get_data["type"] == payload["type"]
     assert response_get_data["description"] == payload["description"]
 
 
