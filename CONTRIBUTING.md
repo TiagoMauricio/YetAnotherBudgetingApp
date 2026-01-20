@@ -86,7 +86,6 @@ erDiagram
         int account_id FK
         int category_id FK
         int user_id FK
-        string type "income/expense"
         float amount
         date date
     }
@@ -95,7 +94,7 @@ erDiagram
         int id PK
         int account_id FK
         string name
-        string type "income/expense"
+        bool is_expense
         bool is_default
     }
 
