@@ -50,6 +50,7 @@ exception_handler_pairs = [
     (exceptions.NotPermitedException, handlers.operation_not_permited_handler),
     (exceptions.EntityNotFoundException, handlers.not_found_handler),
     (exceptions.BadRequestException, handlers.bad_request_handler),
+    (exceptions.DuplicateEntityException, handlers.duplicate_entity_handler),
     (exceptions.UnknownException, handlers.unknown_exception_handler),
     (
         exceptions.PasswordVerificationException,

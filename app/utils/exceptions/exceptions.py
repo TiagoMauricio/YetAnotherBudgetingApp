@@ -34,6 +34,12 @@ class PasswordVerificationException(PexaException):
     pass
 
 
+class DuplicateEntityException(PexaException):
+    """Exception to raise if user tries to create a resource that already exists"""
+
+    pass
+
+
 class UnknownException(PexaException):
     """Throw this when nothing appropriate happened"""
 

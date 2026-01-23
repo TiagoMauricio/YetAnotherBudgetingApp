@@ -33,9 +33,10 @@ class Transaction(SQLModel, table=True):
 
 class Category(SQLModel, table=True):
     id: int = Field(primary_key=True)
-    account_id: int | None = Field(default=None, foreign_key="account.id")
+    user_id: int | None = Field(default=None, foreign_key="user.id")
     name: str
     is_expense: bool
+    description: str | None = None
     is_default: bool = Field(default=False)
 
 

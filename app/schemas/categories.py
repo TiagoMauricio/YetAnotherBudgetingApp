@@ -1,11 +1,16 @@
 from pydantic import BaseModel
 
 
-class CategoryResponse(BaseModel):
+class CategoryCreate(BaseModel):
+    """Schema for creating a new category"""
+
+    name: str
+    is_expense: bool
+    description: str | None = None
+
+
+class CategoryResponse(CategoryCreate):
     """Base schema for category responses"""
 
     id: int
-    account_id: int | None
-    name: str
-    is_expense: bool
-    is_default: bool
+    user_id: int
