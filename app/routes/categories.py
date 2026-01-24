@@ -1,14 +1,15 @@
+from collections.abc import Sequence
 from typing import Annotated
+
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
 from starlette import status
-from app.database import get_session
 
 from app.crud import categories as cat_crud
-from app.schemas.categories import CategoryResponse, CategoryCreate
-from app.utils.dependencies import get_current_user
+from app.database import get_session
 from app.models import Category, User
-
+from app.schemas.categories import CategoryCreate, CategoryResponse
+from app.utils.dependencies import get_current_user
 from app.utils.exceptions import exceptions as err
 
 router: APIRouter = APIRouter(tags=["categories"])
@@ -20,9 +21,9 @@ router: APIRouter = APIRouter(tags=["categories"])
 async def get_category_list(
     user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
-) -> list[CategoryResponse]:
+) -> Sequence[Category]:
     try:
-        categories: list[Category] = cat_crud.get_user_accessible_categories(
+        categories: Sequence[Category] = cat_crud.get_user_accessible_categories(
             user, session
         )
         return categories
@@ -40,8 +41,11 @@ async def get_category(
     category_id: int,
     user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
-) -> CategoryResponse:
-    pass
+) -> Category:
+    category: Category | None = cat_crud.get_category_by_id(user, session, category_id)
+    if not category:
+        raise err.EntityNotFoundException("Category not found.")
+    return category
 
 
 @router.post(
@@ -51,10 +55,10 @@ async def create_category(
     category_data: CategoryCreate,
     user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
-) -> CategoryResponse:
+) -> Category:
     try:
         new_category: Category = cat_crud.create_category(user, category_data, session)
-        return CategoryResponse.model_validate(new_category)
+        return new_category
     except Exception as e:
         raise e
 

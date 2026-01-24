@@ -13,4 +13,4 @@ class CategoryResponse(CategoryCreate):
     """Base schema for category responses"""
 
     id: int
-    user_id: int
+    user_id: int | None
