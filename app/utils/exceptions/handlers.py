@@ -38,3 +38,9 @@ async def authentication_missing_exception_handler(
     request: Request, exc: err.AuthenticationException
 ) -> JSONResponse:
     return JSONResponse(status_code=401, content={"message": exc.message})
+
+
+async def duplicate_entity_handler(
+    request: Request, exc: err.DuplicateEntityException
+) -> JSONResponse:
+    return JSONResponse(status_code=400, content={"message": exc.message})
