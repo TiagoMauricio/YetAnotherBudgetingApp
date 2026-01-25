@@ -101,9 +101,6 @@ def update_category(
     except err.NotPermitedException as e:
         print(e.message)
         return None
-    except Exception as e:
-        print(e)
-        raise err.UnknownException("Something unexpected happened.")
 
 
 def delete_category(user: User, session: Session, category_id: int) -> bool:
