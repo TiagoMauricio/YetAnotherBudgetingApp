@@ -8,7 +8,17 @@ from app.schemas.categories import CategoryCreate
 from app.utils.exceptions import exceptions as err
 
 
-def get_user_accessible_categories(user, session: Session) -> Sequence[Category]:
+def _user_category_exists(
+    user: User, session: Session, category_data: CategoryCreate
+) -> Category | None:
+    existing_category_query = select(Category).where(
+        (Category.user_id == user.id), (Category.name == category_data.name)
+    )
+    existing_category: Category | None = session.exec(existing_category_query).first()
+    return existing_category
+
+
+def get_user_accessible_categories(user: User, session: Session) -> Sequence[Category]:
     categories_query: SelectOfScalar[Category] = select(Category).where(
         (Category.user_id == user.id) | (Category.is_default)
     )
@@ -35,11 +45,10 @@ def get_category_by_id(
         return None
 
 
-def create_category(user, category_data: CategoryCreate, session: Session):
-    existing_category_query = select(Category).where(
-        (Category.user_id == user.id), (Category.name == category_data.name)
+def create_category(user: User, session: Session, category_data: CategoryCreate):
+    existing_category: Category | None = _user_category_exists(
+        user, session, category_data
     )
-    existing_category = session.exec(existing_category_query).first()
 
     if existing_category:
         raise err.DuplicateEntityException(
@@ -58,3 +67,51 @@ def create_category(user, category_data: CategoryCreate, session: Session):
     session.commit()
     session.refresh(new_category)
     return new_category
+
+
+def update_category(
+    user: User, session: Session, category_id: int, category_data: CategoryCreate
+) -> Category | None:
+    try:
+        category: Category | None = session.get(Category, category_id)
+        if not category:
+            raise err.EntityNotFoundException("Category not found.")
+        if category.user_id != user.id or category.is_default:
+            raise err.NotPermitedException(
+                f"User {user.id} tried to update Category {category_id}"
+            )
+
+        existing_category: Category | None = _user_category_exists(
+            user, session, category_data
+        )
+
+        if existing_category:
+            raise err.DuplicateEntityException(
+                f"Category {category_data.name} already exists"
+            )
+        update_data = category_data.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(category, field, value)
+
+        session.add(category)
+        session.commit()
+        session.refresh(category)
+        return category
+
+    except err.NotPermitedException as e:
+        print(e.message)
+        return None
+    except Exception as e:
+        print(e)
+        raise err.UnknownException("Something unexpected happened.")
+
+
+def delete_category(user: User, session: Session, category_id: int) -> bool:
+    category: Category | None = get_category_by_id(user, session, category_id)
+    if not category:
+        raise err.EntityNotFoundException("Category not found.")
+    if category.is_default:
+        raise err.NotPermitedException("You can't delete a default category.")
+    session.delete(category)
+    session.commit()
+    return True

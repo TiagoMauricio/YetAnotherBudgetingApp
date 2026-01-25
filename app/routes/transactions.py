@@ -84,7 +84,7 @@ async def delete_transaction(
     transaction_id: int,
     user: Annotated[str, Depends(get_current_user)],
     session: Session = Depends(get_session),
-):
+) -> None:
     transaction: Transaction | None = t_crud.find_transaction_by_id(
         transaction_id, session
     )

@@ -57,7 +57,7 @@ async def create_category(
     session: Session = Depends(get_session),
 ) -> Category:
     try:
-        new_category: Category = cat_crud.create_category(user, category_data, session)
+        new_category: Category = cat_crud.create_category(user, session, category_data)
         return new_category
     except Exception as e:
         raise e
@@ -70,11 +70,16 @@ async def create_category(
 )
 async def update_category(
     category_id: int,
-    category_data: CategoryResponse,
+    category_data: CategoryCreate,
     user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
-) -> CategoryResponse:
-    pass
+) -> Category:
+    category: Category | None = cat_crud.update_category(
+        user, session, category_id, category_data
+    )
+    if not category:
+        raise err.EntityNotFoundException("Category not found.")
+    return category
 
 
 @router.delete(path="/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -83,4 +88,6 @@ async def delete_category(
     user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
 ) -> None:
-    pass
+    deleted_category: bool = cat_crud.delete_category(user, session, category_id)
+    if not deleted_category:
+        raise err.UnknownException("Something unexpected happened.")
