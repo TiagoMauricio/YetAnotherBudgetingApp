@@ -27,6 +27,15 @@ class Helpers:
         }
         return payload
 
+    @staticmethod
+    def category_payload():
+        payload: dict[str, str | bool] = {
+            "name": "Test Category",
+            "is_expense": True,
+            "description": "Test Description",
+        }
+        return payload
+
 
 @pytest.fixture
 def helpers():
