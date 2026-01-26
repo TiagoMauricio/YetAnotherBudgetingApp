@@ -1,10 +1,10 @@
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session, SQLModel, create_engine, select
 from sqlmodel.pool import StaticPool
 
 from app.main import app
-from app.database import get_session
+from app.database import get_session, create_db_and_tables
 from app.utils.security import create_access_token
 
 
@@ -55,6 +55,20 @@ def session_fixture():
     )
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
+        # Create default categories
+        from app.models import Category
+        from app.database import DEFAULT_CATEGORIES
+
+        for c in DEFAULT_CATEGORIES:
+            existing = session.exec(
+                select(Category).where(Category.name == c[0], Category.is_default)
+            ).first()
+
+            if not existing:
+                new_category = Category(name=c[0], is_default=True, is_expense=c[1])
+                session.add(new_category)
+
+        session.commit()
         yield session
 
 

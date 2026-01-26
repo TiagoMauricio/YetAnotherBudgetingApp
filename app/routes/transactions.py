@@ -7,7 +7,7 @@ from starlette import status
 from app.crud import accounts as acc_crud
 from app.crud import transactions as t_crud
 from app.database import get_session
-from app.models import Transaction
+from app.models import Transaction, User
 from app.schemas.transactions import (
     BaseTransaction,
     TransactionResponse,
@@ -26,7 +26,7 @@ router = APIRouter(tags=["transactions"])
 )
 async def get_transaction(
     transaction_id: int,
-    user: Annotated[str, Depends(get_current_user)],
+    user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
 ) -> Transaction | None:
     try:
@@ -50,7 +50,7 @@ async def get_transaction(
 )
 async def create_transaction(
     transaction_data: BaseTransaction,
-    user: Annotated[str, Depends(get_current_user)],
+    user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
 ) -> Transaction:
     transaction: Transaction = t_crud.create_transaction(
@@ -63,7 +63,7 @@ async def create_transaction(
 async def update_transaction(
     transaction_id: int,
     transaction_data: TransactionUpdate,
-    user: Annotated[str, Depends(get_current_user)],
+    user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
 ) -> Transaction | None:
     transaction: Transaction | None = t_crud.find_transaction_by_id(
@@ -73,16 +73,19 @@ async def update_transaction(
         raise err.EntityNotFoundException("Transaction not found")
     if not acc_crud.user_has_account_access(user.id, transaction.account_id, session):
         raise err.EntityNotFoundException("User does not have acccess to account.")
-    updated_transaction: Transaction | None = t_crud.update_transaction(
-        transaction_id, transaction_data, session
-    )
-    return updated_transaction
+    try:
+        updated_transaction: Transaction | None = t_crud.update_transaction(
+            transaction_id, transaction_data, user, session
+        )
+        return updated_transaction
+    except err.EntityNotFoundException as e:
+        raise e
 
 
 @router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_transaction(
     transaction_id: int,
-    user: Annotated[str, Depends(get_current_user)],
+    user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
 ) -> None:
     transaction: Transaction | None = t_crud.find_transaction_by_id(

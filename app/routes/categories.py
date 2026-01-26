@@ -11,6 +11,7 @@ from app.models import Category, User
 from app.schemas.categories import CategoryCreate, CategoryResponse
 from app.utils.dependencies import get_current_user
 from app.utils.exceptions import exceptions as err
+from app.utils.messages import CATEGORY_NOT_FOUND
 
 router: APIRouter = APIRouter(tags=["categories"])
 
@@ -44,7 +45,7 @@ async def get_category(
 ) -> Category:
     category: Category | None = cat_crud.get_category_by_id(user, session, category_id)
     if not category:
-        raise err.EntityNotFoundException("Category not found.")
+        raise err.EntityNotFoundException(CATEGORY_NOT_FOUND)
     return category
 
 
@@ -78,7 +79,7 @@ async def update_category(
         user, session, category_id, category_data
     )
     if not category:
-        raise err.EntityNotFoundException("Category not found.")
+        raise err.EntityNotFoundException(CATEGORY_NOT_FOUND)
     return category
 
 

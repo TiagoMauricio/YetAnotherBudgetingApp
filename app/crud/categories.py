@@ -6,6 +6,7 @@ from sqlmodel.sql.expression import SelectOfScalar
 from app.models import Category, User
 from app.schemas.categories import CategoryCreate
 from app.utils.exceptions import exceptions as err
+from app.utils.messages import CATEGORY_NOT_FOUND
 
 
 def _user_category_exists(
@@ -32,7 +33,7 @@ def get_category_by_id(
     try:
         category: Category | None = session.get(Category, category_id)
         if not category:
-            raise err.EntityNotFoundException("Category not Found")
+            raise err.EntityNotFoundException(CATEGORY_NOT_FOUND)
         if category.user_id and category.user_id != user.id:
             raise err.NotPermitedException(
                 f"User {user.id} tried to access Category {category_id}"
@@ -75,7 +76,7 @@ def update_category(
     try:
         category: Category | None = session.get(Category, category_id)
         if not category:
-            raise err.EntityNotFoundException("Category not found.")
+            raise err.EntityNotFoundException(CATEGORY_NOT_FOUND)
         if category.user_id != user.id or category.is_default:
             raise err.NotPermitedException(
                 f"User {user.id} tried to update Category {category_id}"
@@ -106,7 +107,7 @@ def update_category(
 def delete_category(user: User, session: Session, category_id: int) -> bool:
     category: Category | None = get_category_by_id(user, session, category_id)
     if not category:
-        raise err.EntityNotFoundException("Category not found.")
+        raise err.EntityNotFoundException(CATEGORY_NOT_FOUND)
     if category.is_default:
         raise err.NotPermitedException("You can't delete a default category.")
     session.delete(category)
