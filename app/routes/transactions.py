@@ -73,13 +73,10 @@ async def update_transaction(
         raise err.EntityNotFoundException("Transaction not found")
     if not acc_crud.user_has_account_access(user.id, transaction.account_id, session):
         raise err.EntityNotFoundException("User does not have acccess to account.")
-    try:
-        updated_transaction: Transaction | None = t_crud.update_transaction(
-            transaction_id, transaction_data, user, session
-        )
-        return updated_transaction
-    except err.EntityNotFoundException as e:
-        raise e
+    updated_transaction: Transaction | None = t_crud.update_transaction(
+        transaction_id, transaction_data, user, session
+    )
+    return updated_transaction
 
 
 @router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)

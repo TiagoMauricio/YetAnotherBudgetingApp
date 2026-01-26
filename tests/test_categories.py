@@ -23,24 +23,16 @@ def test_get_category_list_success(
     assert response.status_code == 200
 
     categories = response.json()
-    # Should have 7 default categories + 2 user created = 9 total
     assert len(categories) == 9
 
-    # Filter to get user created categories
     user_categories = [c for c in categories if not c["is_default"]]
     assert len(user_categories) == 2
 
     first_category = user_categories[0]
     second_category = user_categories[1]
 
-    # Check that the names match what we created (order may vary)
-    created_names = {payload["name"], payload2["name"]}
-    returned_names = {first_category["name"], second_category["name"]}
-    assert created_names == returned_names
-
-    # Check both are user created categories
-    assert not first_category["is_default"]
-    assert not second_category["is_default"]
+    assert payload["name"] == first_category["name"]
+    assert payload2["name"] == second_category["name"]
 
 
 def test_get_category_list_unauthenticated(client: TestClient):
