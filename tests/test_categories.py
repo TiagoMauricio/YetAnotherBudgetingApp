@@ -23,16 +23,17 @@ def test_get_category_list_success(
     assert response.status_code == 200
 
     categories = response.json()
-    assert len(categories) == 2
+    assert len(categories) == 9
 
-    first_category = categories[0]
-    second_category = categories[1]
+    user_categories = [c for c in categories if not c["is_default"]]
+    assert len(user_categories) == 2
 
-    assert first_category["id"] == 1
-    assert first_category["name"] == payload["name"]
+    first_category = user_categories[0]
+    second_category = user_categories[1]
 
-    assert second_category["id"] == 2
-    assert second_category["name"] == payload2["name"]
+    assert payload["name"] == first_category["name"]
+    assert payload2["name"] == second_category["name"]
+
 
 def test_get_category_list_unauthenticated(client: TestClient):
     response: Response = client.get(url=API_URL)
@@ -186,6 +187,7 @@ def test_update_default_category_forbidden(
     # TODO: not sure how to do this
     pass
 
+
 def test_update_category_unauthenticated(client: TestClient):
     payload = Helpers.category_payload()
     response: Response = client.patch(url=f"{API_URL}/1", json=payload)
@@ -228,6 +230,7 @@ def test_delete_default_category_forbidden(
     """Test that default categories cannot be deleted"""
     # TODO: not sure how to do this
     pass
+
 
 def test_delete_category_unauthenticated(client: TestClient):
     response: Response = client.delete(url=f"{API_URL}/1")

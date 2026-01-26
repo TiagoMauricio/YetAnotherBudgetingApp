@@ -14,3 +14,4 @@ class CategoryResponse(CategoryCreate):
 
     id: int
     user_id: int | None
+    is_default: bool = False

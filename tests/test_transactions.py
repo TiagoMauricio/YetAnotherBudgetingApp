@@ -1,6 +1,8 @@
 from fastapi.testclient import TestClient
 from httpx import Response
 
+from app.utils.messages import CATEGORY_NOT_FOUND
+
 from tests.conftest import Helpers
 
 API_URL = "/api/transactions"
@@ -52,7 +54,7 @@ def test_update_transaction(
     assert response_create.json()["account_id"] == account["id"]
 
     update_payload: dict[str, str | int | float] = {
-        "category_id": 123,
+        "category_id": 4,
         "description": "Updated description",
         "amount": 23.5,
     }
@@ -67,6 +69,18 @@ def test_update_transaction(
     assert update_data["category_id"] == update_payload["category_id"]
     assert update_data["description"] == update_payload["description"]
     assert update_data["amount"] == update_payload["amount"]
+
+    update_payload_unkown: dict[str, str | int | float] = {
+        "category_id": 123,
+    }
+    update_response_unknown: Response = client.patch(
+        url=f"{API_URL}/{response_create.json()["id"]}",
+        headers=headers,
+        json=update_payload_unkown,
+    )
+    update_data_unknown: dict[str, str] = update_response_unknown.json()
+    assert update_response_unknown.status_code == 404
+    assert update_data_unknown["message"] == CATEGORY_NOT_FOUND
 
 
 def test_delete_transaction(

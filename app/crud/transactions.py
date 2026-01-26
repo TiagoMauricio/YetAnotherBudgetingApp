@@ -1,8 +1,11 @@
 from sqlmodel import Session
+from app.utils.messages import CATEGORY_NOT_FOUND
 
 from app.crud import accounts as acc_crud
-from app.models import Account, Transaction, User
+from app.crud import categories as cat_crud
+from app.models import Account, Transaction, User, Category
 from app.schemas.transactions import BaseTransaction, TransactionUpdate
+from app.utils.exceptions import exceptions as err
 
 
 def find_transaction_by_id(transaction_id: int, session: Session) -> Transaction | None:
@@ -14,6 +17,15 @@ def create_transaction(transaction_data: BaseTransaction, user: User, session: S
     account: Account | None = acc_crud.get_account_by_id(
         transaction_data.account_id, user, session
     )
+    if not account:
+        raise err.EntityNotFoundException("Account not found")
+
+    category: Category | None = cat_crud.get_category_by_id(
+        user, session, transaction_data.category_id
+    )
+    if not category:
+        raise err.EntityNotFoundException(CATEGORY_NOT_FOUND)
+
     new_transaction: Transaction = Transaction(
         account_id=account.id,
         category_id=transaction_data.category_id,
@@ -30,11 +42,24 @@ def create_transaction(transaction_data: BaseTransaction, user: User, session: S
 
 
 def update_transaction(
-    transaction_id: int, transaction_data: TransactionUpdate, session: Session
+    transaction_id: int,
+    transaction_data: TransactionUpdate,
+    user: User,
+    session: Session,
 ) -> Transaction | None:
     transaction: Transaction | None = find_transaction_by_id(transaction_id, session)
+    if not transaction:
+        raise err.EntityNotFoundException("Transaction not found.")
 
     update_data = transaction_data.model_dump(exclude_unset=True)
+
+    if "category_id" in update_data:
+        category: Category | None = cat_crud.get_category_by_id(
+            user, session, update_data["category_id"]
+        )
+        if not category:
+            raise err.BadRequestException("Please provide a valid Category")
+
     for field, value in update_data.items():
         setattr(transaction, field, value)
 
