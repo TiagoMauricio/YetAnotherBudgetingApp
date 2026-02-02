@@ -23,9 +23,7 @@ def create_account(account: AccountBase, user: User, session: Session) -> Accoun
     user_accounts = get_accounts_by_user(user_id=user.id, session=session)
 
     if account.name in [acc.name for acc in user_accounts]:
-        raise err.BadRequestException(
-            f"You already have an account named: {account.name}"
-        )
+        raise err.BadRequestException(utils_msg.ACCOUNT_ALREADY_EXISTS)
 
     new_account: Account = Account(
         name=account.name,
@@ -52,7 +50,7 @@ def get_account_by_id(account_id: int, user: User, session: Session) -> Account 
     # then check if user has access to it
     user_accounts = get_accounts_by_user(user_id=user.id, session=session)
     if account_id not in [acc.id for acc in user_accounts]:
-        raise err.NotPermitedException("You don't have access to this account")
+        raise err.NotPermitedException(utils_msg.ACCOUNT_ACCESS_DENIED)
     return session.get(Account, account_id)
 
 
@@ -84,9 +82,9 @@ def update_account(
     """Update account details"""
     account = session.get(Account, account_id)
     if not account:
-        raise err.EntityNotFoundException("Account does not exist.")
+        raise err.EntityNotFoundException(utils_msg.ACCOUNT_NOT_FOUND)
     elif not user_is_account_owner(user.id, account_id, session):
-        raise err.NotPermitedException("You do not own this account.")
+        raise err.NotPermitedException(utils_msg.ACCOUNT_OWNERSHIP_REQUIRED)
 
     update_data = account_data.model_dump(exclude_unset=True)
 

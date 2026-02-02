@@ -52,9 +52,7 @@ def create_category(user: User, session: Session, category_data: CategoryCreate)
     )
 
     if existing_category:
-        raise err.DuplicateEntityException(
-            f"Category {category_data.name} already exists"
-        )
+        raise err.DuplicateEntityException(CATEGORY_DUPLICATE)
 
     new_category = Category(
         name=category_data.name,
@@ -87,9 +85,7 @@ def update_category(
         )
 
         if existing_category:
-            raise err.DuplicateEntityException(
-                f"Category {category_data.name} already exists"
-            )
+            raise err.DuplicateEntityException(CATEGORY_DUPLICATE)
         update_data = category_data.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(category, field, value)
@@ -109,7 +105,7 @@ def delete_category(user: User, session: Session, category_id: int) -> bool:
     if not category:
         raise err.EntityNotFoundException(CATEGORY_NOT_FOUND)
     if category.is_default:
-        raise err.NotPermitedException("You can't delete a default category.")
+        raise err.NotPermitedException(DEFAULT_CATEGORY_DELETE_FORBIDDEN)
     session.delete(category)
     session.commit()
     return True
