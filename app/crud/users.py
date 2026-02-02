@@ -3,6 +3,7 @@ from sqlmodel import Session, select
 from app.models import User
 from app.schemas.users import UserCreate
 from app.utils.exceptions import exceptions as err
+from app.utils.messages import USER_NOT_FOUND
 from app.utils.security import hash_password
 
 
@@ -35,7 +36,7 @@ def find_all_users(session: Session):
 def update_user(user_id: int, user_data: UserCreate, session: Session):
     user = find_user_by_id(user_id, session)
     if not user:
-        raise err.EntityNotFoundException("User not found")
+        raise err.EntityNotFoundException(USER_NOT_FOUND)
     user.name = user_data.name
     if user_data.password:
         user.password_hash = hash_password(user_data.password)

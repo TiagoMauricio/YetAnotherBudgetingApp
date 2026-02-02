@@ -23,7 +23,7 @@ def create_account(account: AccountBase, user: User, session: Session) -> Accoun
     user_accounts = get_accounts_by_user(user_id=user.id, session=session)
 
     if account.name in [acc.name for acc in user_accounts]:
-        raise err.BadRequestException(utils_msg.ACCOUNT_ALREADY_EXISTS)
+        raise err.BadRequestException(utils_msg.account_already_exists(account.name))
 
     new_account: Account = Account(
         name=account.name,

@@ -1,11 +1,16 @@
 from sqlmodel import Session
-from app.utils.messages import CATEGORY_NOT_FOUND
 
 from app.crud import accounts as acc_crud
 from app.crud import categories as cat_crud
 from app.models import Account, Transaction, User, Category
 from app.schemas.transactions import BaseTransaction, TransactionUpdate
 from app.utils.exceptions import exceptions as err
+from app.utils.messages import (
+    ACCOUNT_NOT_FOUND,
+    CATEGORY_NOT_FOUND,
+    TRANSACTION_NOT_FOUND,
+    TRANSACTION_INVALID_CATEGORY,
+)
 
 
 def find_transaction_by_id(transaction_id: int, session: Session) -> Transaction | None:
@@ -18,7 +23,7 @@ def create_transaction(transaction_data: BaseTransaction, user: User, session: S
         transaction_data.account_id, user, session
     )
     if not account:
-        raise err.EntityNotFoundException("Account not found")
+        raise err.EntityNotFoundException(ACCOUNT_NOT_FOUND)
 
     category: Category | None = cat_crud.get_category_by_id(
         user, session, transaction_data.category_id
@@ -49,7 +54,7 @@ def update_transaction(
 ) -> Transaction | None:
     transaction: Transaction | None = find_transaction_by_id(transaction_id, session)
     if not transaction:
-        raise err.EntityNotFoundException("Transaction not found.")
+        raise err.EntityNotFoundException(TRANSACTION_NOT_FOUND)
 
     update_data = transaction_data.model_dump(exclude_unset=True)
 
@@ -58,7 +63,7 @@ def update_transaction(
             user, session, update_data["category_id"]
         )
         if not category:
-            raise err.BadRequestException("Please provide a valid Category")
+            raise err.BadRequestException(TRANSACTION_INVALID_CATEGORY)
 
     for field, value in update_data.items():
         setattr(transaction, field, value)

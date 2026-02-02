@@ -6,7 +6,11 @@ from sqlmodel.sql.expression import SelectOfScalar
 from app.models import Category, User
 from app.schemas.categories import CategoryCreate
 from app.utils.exceptions import exceptions as err
-from app.utils.messages import CATEGORY_NOT_FOUND
+from app.utils.messages import (
+    CATEGORY_NOT_FOUND,
+    CATEGORY_DUPLICATE,
+    DEFAULT_CATEGORY_DELETE_FORBIDDEN,
+)
 
 
 def _user_category_exists(
@@ -52,7 +56,7 @@ def create_category(user: User, session: Session, category_data: CategoryCreate)
     )
 
     if existing_category:
-        raise err.DuplicateEntityException(CATEGORY_DUPLICATE)
+        raise err.DuplicateEntityException(CATEGORY_DUPLICATE(category_data.name))
 
     new_category = Category(
         name=category_data.name,
@@ -85,7 +89,7 @@ def update_category(
         )
 
         if existing_category:
-            raise err.DuplicateEntityException(CATEGORY_DUPLICATE)
+            raise err.DuplicateEntityException(CATEGORY_DUPLICATE(category_data.name))
         update_data = category_data.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(category, field, value)
