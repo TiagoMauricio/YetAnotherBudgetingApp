@@ -119,23 +119,24 @@ def delete_account(account_id: int, session: Session) -> bool:
     return True
 
 
+def get_membership(
+    account_id: int, user_id: int, session: Session
+) -> AccountMembership | None:
+    """Get a specific account membership"""
+    return session.exec(
+        select(AccountMembership).where(
+            AccountMembership.account_id == account_id,
+            AccountMembership.user_id == user_id,
+        )
+    ).first()
+
+
 def add_user_to_account(
     account_id: int, user_id: int, session: Session, role: str = "member"
-) -> AccountMembership | None:
+) -> AccountMembership:
     """Add a user to an account with specified role"""
-    # Check if membership already exists
-    existing_query = select(AccountMembership).where(
-        AccountMembership.account_id == account_id, AccountMembership.user_id == user_id
-    )
-    existing = session.exec(existing_query).first()
-    if existing:
-        return existing
-
-    # Verify account and user exist
-    account = session.get(Account, account_id)
-    user = session.get(User, user_id)
-    if not account or not user:
-        return None
+    if get_membership(account_id, user_id, session):
+        raise err.DuplicateEntityException(utils_msg.MEMBERSHIP_ALREADY_EXISTS)
 
     membership = AccountMembership(
         account_id=account_id, user_id=user_id, role=role, is_owner=False
@@ -146,20 +147,16 @@ def add_user_to_account(
     return membership
 
 
-def remove_user_from_account(account_id: int, user_id: int, session: Session) -> bool:
+def remove_user_from_account(account_id: int, user_id: int, session: Session) -> None:
     """Remove a user from an account"""
-    query = select(AccountMembership).where(
-        AccountMembership.account_id == account_id,
-        AccountMembership.user_id == user_id,
-        AccountMembership.is_owner == False,  # Cannot remove owner
-    )
-    membership = session.exec(query).first()
+    membership = get_membership(account_id, user_id, session)
     if not membership:
-        return False
+        raise err.EntityNotFoundException(utils_msg.MEMBERSHIP_NOT_FOUND)
+    if membership.is_owner:
+        raise err.BadRequestException(utils_msg.CANNOT_REMOVE_ACCOUNT_OWNER)
 
     session.delete(membership)
     session.commit()
-    return True
 
 
 def get_account_members(account_id: int, session: Session) -> Sequence[dict]:
