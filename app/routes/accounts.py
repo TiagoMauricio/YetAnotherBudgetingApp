@@ -11,7 +11,7 @@ import app.utils.messages as messages
 from app.database import get_session
 from app.models import Account, Transaction, User
 from app.schemas.accounts import Account as AccountResponse
-from app.schemas.accounts import AccountBase, AccountUpdate
+from app.schemas.accounts import AccountBase, AccountMember, AccountMembershipCreate, AccountUpdate
 from app.schemas.transactions import TransactionResponse
 from app.utils.dependencies import get_current_user
 from app.utils.exceptions import exceptions as err
@@ -65,6 +65,56 @@ async def update_account(
         account_id, account_data, user, session
     )
     return account
+
+
+@router.get(
+    path="/{account_id}/members",
+    status_code=status.HTTP_200_OK,
+    response_model=list[AccountMember],
+)
+async def get_account_members(
+    account_id: int,
+    user: Annotated[User, Depends(get_current_user)],
+    session: Session = Depends(get_session),
+) -> list[dict]:
+    if not account_crud.user_has_account_access(user.id, account_id, session):
+        raise err.NotPermitedException(messages.RESOURCE_ACCESS_DENIED)
+    return account_crud.get_account_members(account_id, session)
+
+
+@router.post(
+    path="/{account_id}/members",
+    status_code=status.HTTP_201_CREATED,
+    response_model=AccountMember,
+)
+async def add_account_member(
+    account_id: int,
+    body: AccountMembershipCreate,
+    user: Annotated[User, Depends(get_current_user)],
+    session: Session = Depends(get_session),
+) -> dict:
+    if not account_crud.user_is_account_owner(user.id, account_id, session):
+        raise err.NotPermitedException(messages.RESOURCE_ACCESS_DENIED)
+    if not session.get(User, body.user_id):
+        raise err.EntityNotFoundException("User not found")
+    account_crud.add_user_to_account(account_id, body.user_id, session, role=body.role)
+    members = account_crud.get_account_members(account_id, session)
+    return next(m for m in members if m["user_id"] == body.user_id)
+
+
+@router.delete(
+    path="/{account_id}/members/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def remove_account_member(
+    account_id: int,
+    user_id: int,
+    user: Annotated[User, Depends(get_current_user)],
+    session: Session = Depends(get_session),
+) -> None:
+    if not account_crud.user_is_account_owner(user.id, account_id, session):
+        raise err.NotPermitedException(messages.RESOURCE_ACCESS_DENIED)
+    account_crud.remove_user_from_account(account_id, user_id, session)
 
 
 # TODO: This endpoint will need pagination!
