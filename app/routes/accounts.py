@@ -11,7 +11,12 @@ import app.utils.messages as messages
 from app.database import get_session
 from app.models import Account, Transaction, User
 from app.schemas.accounts import Account as AccountResponse
-from app.schemas.accounts import AccountBase, AccountMember, AccountMembershipCreate, AccountUpdate
+from app.schemas.accounts import (
+    AccountBase,
+    AccountMember,
+    AccountMembershipCreate,
+    AccountUpdate,
+)
 from app.schemas.transactions import TransactionResponse
 from app.utils.dependencies import get_current_user
 from app.utils.exceptions import exceptions as err
@@ -97,7 +102,7 @@ async def add_account_member(
         raise err.NotPermitedException(messages.RESOURCE_ACCESS_DENIED)
     if not session.get(User, body.user_id):
         raise err.EntityNotFoundException("User not found")
-    account_crud.add_user_to_account(account_id, body.user_id, session, role=body.role)
+    account_crud.add_user_to_account(account_id, body.user_id, session)
     members = account_crud.get_account_members(account_id, session)
     return next(m for m in members if m["user_id"] == body.user_id)
 

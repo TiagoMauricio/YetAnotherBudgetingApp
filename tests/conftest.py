@@ -113,3 +113,20 @@ def create_account(client: TestClient, token: str):
     payload = {"name": "string", "currency_code": "str", "description": "string"}
     account = client.post("api/accounts", headers=headers, json=payload)
     yield account.json()
+
+
+@pytest.fixture(scope="module", name="second_user")
+def second_user_fixture(client: TestClient):
+    user_data = {
+        "email": "member@fixture.com",
+        "name": "Member User",
+        "password": "testpassword123",
+    }
+    response = client.post("/api/auth/register", json=user_data)
+    yield response.json()
+
+
+@pytest.fixture(scope="module", name="second_token")
+def second_token_fixture(second_user):
+    token = create_access_token(data={"sub": second_user["email"]})
+    yield token

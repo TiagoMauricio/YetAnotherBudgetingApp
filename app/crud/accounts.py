@@ -1,6 +1,7 @@
 import datetime
 from collections.abc import Sequence
 
+from sqlalchemy.orm import aliased
 from sqlmodel import Session, select
 from sqlmodel.sql.expression import SelectOfScalar
 
@@ -63,6 +64,24 @@ def get_accounts_by_user(user_id: int, session: Session) -> Sequence[Account]:
         .join(AccountMembership)
         .where(AccountMembership.user_id == user_id)
         .order_by(Account.created_at.desc())
+    )
+    return session.exec(query).all()
+
+
+def get_accounts_by_user_with_owner(
+    user_id: int, session: Session
+) -> Sequence[tuple[Account, int]]:
+    """Get all accounts the user belongs to, with each account's owner user_id"""
+    owner_membership = aliased(AccountMembership)
+    query = (
+        select(Account, owner_membership.user_id)
+        .join(AccountMembership, AccountMembership.account_id == Account.id)
+        .join(
+            owner_membership,
+            (owner_membership.account_id == Account.id) & owner_membership.is_owner,
+        )
+        .where(AccountMembership.user_id == user_id)
+        .order_by(Account.name)
     )
     return session.exec(query).all()
 
@@ -132,15 +151,13 @@ def get_membership(
 
 
 def add_user_to_account(
-    account_id: int, user_id: int, session: Session, role: str = "member"
+    account_id: int, user_id: int, session: Session
 ) -> AccountMembership:
-    """Add a user to an account with specified role"""
+    """Add a user to an account as a member"""
     if get_membership(account_id, user_id, session):
         raise err.DuplicateEntityException(utils_msg.MEMBERSHIP_ALREADY_EXISTS)
 
-    membership = AccountMembership(
-        account_id=account_id, user_id=user_id, role=role, is_owner=False
-    )
+    membership = AccountMembership(account_id=account_id, user_id=user_id)
     session.add(membership)
     session.commit()
     session.refresh(membership)
