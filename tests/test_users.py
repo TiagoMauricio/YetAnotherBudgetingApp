@@ -25,7 +25,9 @@ def test_get_me_unauthenticated(client: TestClient):
 def test_update_me_name(helpers, client: TestClient, token):
     """PATCH /api/users/me updates the user's name"""
     headers = helpers.get_bearer_headers(token)
-    response = client.patch("/api/users/me", headers=headers, json={"name": "Updated Name"})
+    response = client.patch(
+        "/api/users/me", headers=headers, json={"name": "Updated Name"}
+    )
     assert response.status_code == 200
     assert response.json()["name"] == "Updated Name"
 
@@ -42,7 +44,9 @@ def test_update_me_password(helpers, client: TestClient, token):
 def test_update_me_short_password(helpers, client: TestClient, token):
     """PATCH /api/users/me rejects passwords shorter than 8 characters"""
     headers = helpers.get_bearer_headers(token)
-    response = client.patch("/api/users/me", headers=headers, json={"password": "short"})
+    response = client.patch(
+        "/api/users/me", headers=headers, json={"password": "short"}
+    )
     assert response.status_code == 422
 
 

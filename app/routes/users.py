@@ -10,6 +10,7 @@ from app.database import get_session
 from app.models import User
 from app.schemas.accounts import AccountWithOwner as AccountSchema
 from app.schemas.users import User as UserResponse
+from app.schemas.users import UserUpdate
 from app.utils import messages
 from app.utils.dependencies import get_current_user
 from app.utils.exceptions import exceptions as err
