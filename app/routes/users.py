@@ -18,7 +18,7 @@ from app.utils.exceptions import exceptions as err
 router: APIRouter = APIRouter()
 
 
-@router.get(path="/me", response_model=UserResponse)
+@router.get(path="/me", status_code=status.HTTP_200_OK, response_model=UserResponse)
 async def get_me(
     user: Annotated[User, Depends(get_current_user)],
 ) -> User:
@@ -26,7 +26,7 @@ async def get_me(
     return user
 
 
-@router.patch(path="/me", response_model=UserResponse)
+@router.patch(path="/me", status_code=status.HTTP_200_OK, response_model=UserResponse)
 async def update_me(
     body: UserUpdate,
     user: Annotated[User, Depends(get_current_user)],
