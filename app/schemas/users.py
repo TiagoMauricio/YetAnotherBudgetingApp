@@ -25,5 +25,8 @@ class User(UserBase):
     updated_at: datetime
 
 
-#    class Config:
-#
+class UserUpdate(BaseModel):
+    """Schema for updating user profile"""
+
+    name: str | None = None
+    password: str | None = Field(default=None, min_length=8)

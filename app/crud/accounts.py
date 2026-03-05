@@ -207,7 +207,10 @@ def get_account_member(account_id: int, user_id: int, session: Session) -> dict 
     query = (
         select(User, AccountMembership)
         .join(AccountMembership, User.id == AccountMembership.user_id)
-        .where(AccountMembership.account_id == account_id, AccountMembership.user_id == user_id)
+        .where(
+            AccountMembership.account_id == account_id,
+            AccountMembership.user_id == user_id,
+        )
     )
     result = session.exec(query).first()
     if not result:

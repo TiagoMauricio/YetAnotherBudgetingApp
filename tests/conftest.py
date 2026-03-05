@@ -3,8 +3,8 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine, select
 from sqlmodel.pool import StaticPool
 
+from app.database import get_session
 from app.main import app
-from app.database import get_session, create_db_and_tables
 from app.utils.security import create_access_token
 
 
@@ -56,8 +56,8 @@ def session_fixture():
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
         # Create default categories
-        from app.models import Category
         from app.database import DEFAULT_CATEGORIES
+        from app.models import Category
 
         for c in DEFAULT_CATEGORIES:
             existing = session.exec(
