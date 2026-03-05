@@ -1,6 +1,7 @@
 import datetime
 from collections.abc import Sequence
 
+from sqlalchemy.orm import aliased
 from sqlmodel import Session, select
 from sqlmodel.sql.expression import SelectOfScalar
 
@@ -67,6 +68,24 @@ def get_accounts_by_user(user_id: int, session: Session) -> Sequence[Account]:
     return session.exec(query).all()
 
 
+def get_accounts_by_user_with_owner(
+    user_id: int, session: Session
+) -> Sequence[tuple[Account, int]]:
+    """Get all accounts the user belongs to, with each account's owner user_id"""
+    owner_membership = aliased(AccountMembership)
+    query = (
+        select(Account, owner_membership.user_id)
+        .join(AccountMembership, AccountMembership.account_id == Account.id)
+        .join(
+            owner_membership,
+            (owner_membership.account_id == Account.id) & owner_membership.is_owner,
+        )
+        .where(AccountMembership.user_id == user_id)
+        .order_by(Account.name)
+    )
+    return session.exec(query).all()
+
+
 def get_user_owned_accounts(user_id: int, session: Session) -> Sequence[Account]:
     """Get all accounts owned by a user"""
     query = (
@@ -119,47 +138,42 @@ def delete_account(account_id: int, session: Session) -> bool:
     return True
 
 
-def add_user_to_account(
-    account_id: int, user_id: int, session: Session, role: str = "member"
+def get_membership(
+    account_id: int, user_id: int, session: Session
 ) -> AccountMembership | None:
-    """Add a user to an account with specified role"""
-    # Check if membership already exists
-    existing_query = select(AccountMembership).where(
-        AccountMembership.account_id == account_id, AccountMembership.user_id == user_id
-    )
-    existing = session.exec(existing_query).first()
-    if existing:
-        return existing
+    """Get a specific account membership"""
+    return session.exec(
+        select(AccountMembership).where(
+            AccountMembership.account_id == account_id,
+            AccountMembership.user_id == user_id,
+        )
+    ).first()
 
-    # Verify account and user exist
-    account = session.get(Account, account_id)
-    user = session.get(User, user_id)
-    if not account or not user:
-        return None
 
-    membership = AccountMembership(
-        account_id=account_id, user_id=user_id, role=role, is_owner=False
-    )
+def add_user_to_account(
+    account_id: int, user_id: int, session: Session
+) -> AccountMembership:
+    """Add a user to an account as a member"""
+    if get_membership(account_id, user_id, session):
+        raise err.DuplicateEntityException(utils_msg.MEMBERSHIP_ALREADY_EXISTS)
+
+    membership = AccountMembership(account_id=account_id, user_id=user_id)
     session.add(membership)
     session.commit()
     session.refresh(membership)
     return membership
 
 
-def remove_user_from_account(account_id: int, user_id: int, session: Session) -> bool:
+def remove_user_from_account(account_id: int, user_id: int, session: Session) -> None:
     """Remove a user from an account"""
-    query = select(AccountMembership).where(
-        AccountMembership.account_id == account_id,
-        AccountMembership.user_id == user_id,
-        AccountMembership.is_owner == False,  # Cannot remove owner
-    )
-    membership = session.exec(query).first()
+    membership = get_membership(account_id, user_id, session)
     if not membership:
-        return False
+        raise err.EntityNotFoundException(utils_msg.MEMBERSHIP_NOT_FOUND)
+    if membership.is_owner:
+        raise err.BadRequestException(utils_msg.CANNOT_REMOVE_ACCOUNT_OWNER)
 
     session.delete(membership)
     session.commit()
-    return True
 
 
 def get_account_members(account_id: int, session: Session) -> Sequence[dict]:
@@ -186,6 +200,27 @@ def get_account_members(account_id: int, session: Session) -> Sequence[dict]:
         )
 
     return members
+
+
+def get_account_member(account_id: int, user_id: int, session: Session) -> dict | None:
+    """Get a single member's details for an account"""
+    query = (
+        select(User, AccountMembership)
+        .join(AccountMembership, User.id == AccountMembership.user_id)
+        .where(AccountMembership.account_id == account_id, AccountMembership.user_id == user_id)
+    )
+    result = session.exec(query).first()
+    if not result:
+        return None
+    user, membership = result
+    return {
+        "user_id": user.id,
+        "email": user.email,
+        "name": user.name,
+        "role": membership.role,
+        "is_owner": membership.is_owner,
+        "joined_at": membership.joined_at,
+    }
 
 
 def user_has_account_access(user_id: int, account_id: int, session: Session) -> bool:

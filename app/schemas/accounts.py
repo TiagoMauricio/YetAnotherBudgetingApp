@@ -55,7 +55,12 @@ class AccountMembershipCreate(BaseModel):
     """Schema for adding a user to an account"""
 
     user_id: int
-    role: str = Field(default="member", description="Role of the user in the account")
+
+
+class AccountWithOwner(Account):
+    """Schema for account response with owner info"""
+
+    owner: int  # user_id of the account owner
 
 
 class AccountWithMembers(Account):
