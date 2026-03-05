@@ -7,7 +7,7 @@ from app.utils.security import hash_password
 
 
 def find_user_by_email(email: str, session: Session):
-    database_query = select(User).where(User.email == email, User.is_active == True)
+    database_query = select(User).where(User.email == email, User.is_active)
     user = session.exec(database_query).first()
     return user
 
