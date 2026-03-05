@@ -97,14 +97,13 @@ async def add_account_member(
     body: AccountMembershipCreate,
     user: Annotated[User, Depends(get_current_user)],
     session: Session = Depends(get_session),
-) -> dict:
+) -> dict | None:
     if not account_crud.user_is_account_owner(user.id, account_id, session):
         raise err.NotPermitedException(messages.RESOURCE_ACCESS_DENIED)
     if not session.get(User, body.user_id):
         raise err.EntityNotFoundException("User not found")
     account_crud.add_user_to_account(account_id, body.user_id, session)
-    members = account_crud.get_account_members(account_id, session)
-    return next(m for m in members if m["user_id"] == body.user_id)
+    return account_crud.get_account_member(account_id, body.user_id, session)
 
 
 @router.delete(

@@ -202,6 +202,27 @@ def get_account_members(account_id: int, session: Session) -> Sequence[dict]:
     return members
 
 
+def get_account_member(account_id: int, user_id: int, session: Session) -> dict | None:
+    """Get a single member's details for an account"""
+    query = (
+        select(User, AccountMembership)
+        .join(AccountMembership, User.id == AccountMembership.user_id)
+        .where(AccountMembership.account_id == account_id, AccountMembership.user_id == user_id)
+    )
+    result = session.exec(query).first()
+    if not result:
+        return None
+    user, membership = result
+    return {
+        "user_id": user.id,
+        "email": user.email,
+        "name": user.name,
+        "role": membership.role,
+        "is_owner": membership.is_owner,
+        "joined_at": membership.joined_at,
+    }
+
+
 def user_has_account_access(user_id: int, account_id: int, session: Session) -> bool:
     """Check if a user has access to an account"""
     query = select(AccountMembership).where(

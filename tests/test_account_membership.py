@@ -40,8 +40,8 @@ def test_owner_is_correct(helpers, client: TestClient, token, user, account):
         f"/api/users/{owner_user['id']}/accounts", headers=owner_headers
     )
     data = response.json()
-    matched = next(a for a in data if a["id"] == new_account["id"])
-    assert matched["owner"] == owner_user["id"]
+    assert data[0]["id"] == new_account["id"]
+    assert data[0]["owner"] == owner_user["id"]
 
 
 def test_get_user_accounts_forbidden(helpers, client: TestClient, token, second_user):
@@ -118,9 +118,9 @@ def test_member_sees_account_in_list(
     response = client.get(f"/api/users/{second_user['id']}/accounts", headers=headers)
     assert response.status_code == 200
     data = response.json()
-    shared = next((a for a in data if a["id"] == account["id"]), None)
-    assert shared is not None
-    assert "owner" in shared
+    account_ids = [a["id"] for a in data]
+    assert account["id"] in account_ids
+    assert all("owner" in a for a in data)
 
 
 def test_remove_account_member(
