@@ -2,7 +2,7 @@ PYTHON=python3
 IMAGE_NAME=pexa
 IMAGE_TAG=latest
 
-.PHONY: test install format lint clean venv help db-init build run stop logs
+.PHONY: test install format lint clean venv help db-init build run stop logs status restart
 
 # Run tests
 test:
@@ -54,6 +54,14 @@ stop:
 logs:
 	docker compose logs -f
 
+# Show status of running containers
+status:
+	docker compose ps
+
+# Restart all containers
+restart:
+	docker compose restart
+
 # Setup db for manual testing
 db-init:
 	./bin/init_db.sh
@@ -73,3 +81,5 @@ help:
 	@echo "  run         - Deploy with docker compose (pexa + caddy)"
 	@echo "  stop        - Stop docker compose deployment"
 	@echo "  logs        - Tail logs from all services"
+	@echo "  status      - Show status of running containers"
+	@echo "  restart     - Restart all containers"

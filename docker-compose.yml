@@ -3,7 +3,7 @@ services:
     image: pexa:latest
     env_file: .env
     volumes:
-      - pexa_data:/app/data
+      - ./data:/app/data
     restart: unless-stopped
 
   caddy:
@@ -22,6 +22,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  pexa_data:
   caddy_data:
   caddy_config:

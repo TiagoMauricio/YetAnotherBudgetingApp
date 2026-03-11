@@ -62,6 +62,9 @@ db.sqlite3
 db.sqlite3-journal
 budget.db
 
+# Data directory (SQLite persistence)
+data/
+
 # Flask stuff:
 instance/
 .webassets-cache
