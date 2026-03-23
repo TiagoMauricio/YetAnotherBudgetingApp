@@ -25,7 +25,6 @@ engine = create_engine(url=DATABASE_URL, connect_args=connect_args)
 
 
 def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
         print("Checking database for Categories...")
         for c in DEFAULT_CATEGORIES:
