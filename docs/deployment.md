@@ -25,15 +25,11 @@ This creates the `pexa:latest` image locally.
 
 ## 3. Generate secret keys
 
-Pexa requires three secret values. Run the following commands to generate them:
+Pexa requires two secret values. Run the following commands to generate them:
 
 ```sh
-# SECRET_KEY and REFRESH_TOKEN_SECRET_KEY
-openssl rand -hex 32
-openssl rand -hex 32
-
-# FERNET_KEY (requires the cryptography package)
-python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+openssl rand -hex 32  # SECRET_KEY
+openssl rand -hex 32  # REFRESH_TOKEN_SECRET_KEY
 ```
 
 Keep these values — you'll put them in the `.env` file next.
@@ -51,7 +47,6 @@ Edit `.env`:
 ```env
 SECRET_KEY=<your-generated-secret-key>
 REFRESH_TOKEN_SECRET_KEY=<your-generated-refresh-token-secret-key>
-FERNET_KEY=<your-generated-fernet-key>
 DATABASE_URL=sqlite:////app/data/db.sqlite3
 DOMAIN=api.yourdomain.com
 ```

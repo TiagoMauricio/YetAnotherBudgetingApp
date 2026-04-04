@@ -75,6 +75,10 @@ docker run -p 8000:8000 \
 ```
 **NOTE**: make sure to have `.env` on the directory you're running the docker command on. This will also create a database file if it doesn't exist.
 
+## Deployment
+
+For instructions on deploying Pexa on your own server, see the [deployment guide](docs/deployment.md).
+
 ## Running Tests
 
 To run the test suite:

@@ -9,7 +9,6 @@ class Settings(BaseSettings):
     database_url: str
     secret_key: str
     refresh_token_secret_key: str
-    fernet_key: str
     cors_origins: str = "*"
 
 
