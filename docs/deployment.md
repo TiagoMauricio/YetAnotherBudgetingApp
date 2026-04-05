@@ -4,18 +4,48 @@ This guide covers how to deploy Pexa on your own server using Docker Compose and
 
 ## Prerequisites
 
-- A Linux server (VPS, home server, etc.) with Docker and Docker Compose installed
+- A Linux server (VPS, home server, etc.)
 - A domain name pointed at your server's public IP
 - Ports 80 and 443 open on your firewall
 
-## 1. Clone the repository
+## 1. Install dependencies
+
+You'll need `git`, `make`, and Docker (with the Compose plugin).
+
+**Ubuntu:**
+
+```sh
+sudo apt install -y git make
+```
+
+For Docker, follow the [official Docker installation guide for Ubuntu](https://docs.docker.com/engine/install/ubuntu/#installation-methods) to install Docker and the Compose plugin.
+
+Allow your user to run Docker without `sudo`:
+
+```sh
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+**Arch:**
+
+```sh
+sudo pacman -Sy --noconfirm git make docker docker-compose
+sudo systemctl enable --now docker
+
+# Allow your user to run Docker without sudo
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+## 2. Clone the repository
 
 ```sh
 git clone https://github.com/TiagoMauricio/pexa.git
 cd pexa
 ```
 
-## 2. Build the Docker image
+## 3. Build the Docker image
 
 ```sh
 make build
@@ -23,7 +53,7 @@ make build
 
 This creates the `pexa:latest` image locally.
 
-## 3. Generate secret keys
+## 4. Generate secret keys
 
 Pexa requires two secret values. Run the following commands to generate them:
 
@@ -34,7 +64,7 @@ openssl rand -hex 32  # REFRESH_TOKEN_SECRET_KEY
 
 Keep these values — you'll put them in the `.env` file next.
 
-## 4. Create the environment file
+## 5. Create the environment file
 
 Copy the example file and fill in your values:
 
@@ -55,7 +85,7 @@ Replace `api.yourdomain.com` with the domain or subdomain pointing at your serve
 
 > `CORS_ORIGINS` is optional. If you have a front-end app at a specific origin, set it to that URL (e.g. `CORS_ORIGINS=https://myapp.example.com`). Defaults to `*` (all origins).
 
-## 5. Create the Caddyfile
+## 6. Create the Caddyfile
 
 Caddy uses a `Caddyfile` to configure the reverse proxy and provision TLS certificates. Create one in the project root:
 
@@ -73,7 +103,7 @@ api.yourdomain.com {
 
 Caddy will automatically obtain and renew a TLS certificate for that domain via Let's Encrypt. No further TLS configuration is needed.
 
-## 6. Create the data directory
+## 7. Create the data directory
 
 The database file is stored in `./data` on the host. Create the directory before starting the stack:
 
@@ -81,7 +111,7 @@ The database file is stored in `./data` on the host. Create the directory before
 mkdir -p data
 ```
 
-## 7. Start the stack
+## 8. Start the stack
 
 ```sh
 make run
@@ -91,7 +121,7 @@ This runs `docker compose up -d`, starting both the `pexa` and `caddy` container
 
 On first start, Pexa automatically applies all database migrations before the API becomes available.
 
-## 8. Verify the deployment
+## 9. Verify the deployment
 
 Check that the API is healthy:
 
