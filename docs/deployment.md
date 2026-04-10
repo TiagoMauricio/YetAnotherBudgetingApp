@@ -53,30 +53,19 @@ make build
 
 This creates the `pexa:latest` image locally.
 
-## 4. Generate secret keys
+## 4. Create the environment file
 
-Pexa requires two secret values. Run the following commands to generate them:
-
-```sh
-openssl rand -hex 32  # SECRET_KEY
-openssl rand -hex 32  # REFRESH_TOKEN_SECRET_KEY
-```
-
-Keep these values — you'll put them in the `.env` file next.
-
-## 5. Create the environment file
-
-Copy the example file and fill in your values:
+Copy the example file:
 
 ```sh
 cp env.example .env
 ```
 
-Edit `.env`:
+Edit `.env` with your values:
 
 ```env
-SECRET_KEY=<your-generated-secret-key>
-REFRESH_TOKEN_SECRET_KEY=<your-generated-refresh-token-secret-key>
+SECRET_KEY=<your-secret-key>
+REFRESH_TOKEN_SECRET_KEY=<your-refresh-token-secret-key>
 DATABASE_URL=sqlite:////app/data/db.sqlite3
 DOMAIN=api.yourdomain.com
 ```
@@ -85,15 +74,19 @@ Replace `api.yourdomain.com` with the domain or subdomain pointing at your serve
 
 > `CORS_ORIGINS` is optional. If you have a front-end app at a specific origin, set it to that URL (e.g. `CORS_ORIGINS=https://myapp.example.com`). Defaults to `*` (all origins).
 
-## 6. Create the Caddyfile
-
-Caddy uses a `Caddyfile` to configure the reverse proxy and provision TLS certificates. Create one in the project root:
+To generate values for `SECRET_KEY` and `REFRESH_TOKEN_SECRET_KEY`, run:
 
 ```sh
-touch Caddyfile
+openssl rand -hex 32
 ```
 
-Add the following content, replacing the domain with your own:
+Run it twice — once for each value.
+
+## 5. Create the Caddyfile
+
+Caddy uses a `Caddyfile` to configure the reverse proxy and provision TLS certificates.
+
+There's already a Caddyfile in the repo. Replace the domain to match your own:
 
 ```
 api.yourdomain.com {
@@ -103,15 +96,18 @@ api.yourdomain.com {
 
 Caddy will automatically obtain and renew a TLS certificate for that domain via Let's Encrypt. No further TLS configuration is needed.
 
-## 7. Create the data directory
+## 6. Create the data directory
 
-The database file is stored in `./data` on the host. Create the directory before starting the stack:
+The database file is stored in `./data` on the host. Create the directory and set the correct ownership before starting the stack:
 
 ```sh
 mkdir -p data
+sudo chown -R 1000:1000 data
 ```
 
-## 8. Start the stack
+The container runs as a non-root user with UID/GID `1000`. Without the correct ownership Docker will mount the directory as `root` and the container won't be able to write the database file.
+
+## 7. Start the stack
 
 ```sh
 make run
@@ -121,7 +117,7 @@ This runs `docker compose up -d`, starting both the `pexa` and `caddy` container
 
 On first start, Pexa automatically applies all database migrations before the API becomes available.
 
-## 9. Verify the deployment
+## 8. Verify the deployment
 
 Check that the API is healthy:
 
