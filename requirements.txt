@@ -41,7 +41,7 @@ Pygments==2.19.2
 PyJWT==2.10.1
 pytest==9.0.2
 python-dotenv==1.2.1
-python-multipart==0.0.22
+python-multipart==0.0.26
 pytokens==0.4.1
 PyYAML==6.0.3
 rich==14.3.1
