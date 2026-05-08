@@ -34,7 +34,7 @@ pathspec==1.0.4
 platformdirs==4.5.1
 pluggy==1.6.0
 pycparser==3.0
-pydantic==2.12.5
+pydantic==2.13.4
 pydantic-settings==2.12.0
 pydantic_core==2.41.5
 Pygments==2.19.2
