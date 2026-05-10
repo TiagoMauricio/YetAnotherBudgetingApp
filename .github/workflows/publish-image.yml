@@ -25,7 +25,9 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run tests
-        run: make test
+        run: |
+          cp env.example .env
+          make test
 
       - name: Extract metadata
         id: meta
@@ -45,7 +47,8 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKERHUB_PROJECT_NAME }}:latest
-            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKERHUB_PROJECT_NAME }}:${{ steps.meta.outputs.SHORT_SHA }}
+            ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKERHUB_PROJECT_NAME }}:latest
+            ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKERHUB_PROJECT_NAME }}:${{ github.ref_name }}
+            ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKERHUB_PROJECT_NAME }}:${{ steps.meta.outputs.SHORT_SHA }}
