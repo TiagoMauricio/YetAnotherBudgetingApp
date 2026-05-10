@@ -50,4 +50,5 @@ jobs:
           platforms: linux/amd64
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKERHUB_PROJECT_NAME }}:latest
+            ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKERHUB_PROJECT_NAME }}:${{ GITHUB_REF }}
             ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKERHUB_PROJECT_NAME }}:${{ steps.meta.outputs.SHORT_SHA }}
