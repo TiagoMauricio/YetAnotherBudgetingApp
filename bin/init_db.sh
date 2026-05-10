@@ -5,13 +5,13 @@
 
 set -e
 
-BASE_URL="http://localhost:8000"
+BASE_URL="https://localhost"
 EMAIL="user@example.com"
 PASSWORD="password123"
 TODAY=`date '+%Y-%m-%d'`
 
 echo "==> Registering user..."
-curl -s -X POST "$BASE_URL/api/auth/register" \
+curl -sk -X POST "$BASE_URL/api/auth/register" \
   -H "Content-Type: application/json" \
   -d "{
     \"email\": \"$EMAIL\",
@@ -20,7 +20,7 @@ curl -s -X POST "$BASE_URL/api/auth/register" \
   }" > /dev/null || true
 
 echo "==> Logging in..."
-TOKEN=$(curl -s -X POST "$BASE_URL/api/auth/login" \
+TOKEN=$(curl -sk -X POST "$BASE_URL/api/auth/login" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "username=$EMAIL&password=$PASSWORD" \
   | jq -r '.access_token')
@@ -33,7 +33,7 @@ fi
 echo "Authenticated"
 
 echo "==> Creating account..."
-ACCOUNT_ID=$(curl -s -X POST "$BASE_URL/api/accounts" \
+ACCOUNT_ID=$(curl -sk -X POST "$BASE_URL/api/accounts" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -45,7 +45,7 @@ ACCOUNT_ID=$(curl -s -X POST "$BASE_URL/api/accounts" \
 echo "Account created: ID=$ACCOUNT_ID"
 
 echo "==> Creating transaction..."
-curl -s -X POST "$BASE_URL/api/transactions" \
+curl -sk -X POST "$BASE_URL/api/transactions" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d "{
@@ -58,4 +58,3 @@ curl -s -X POST "$BASE_URL/api/transactions" \
 
 echo "Transaction created"
 echo "Bootstrap complete!"
-

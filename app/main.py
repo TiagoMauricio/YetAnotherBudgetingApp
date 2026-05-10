@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import settings
 from app.database import create_db_and_tables
 from app.routes.main import api_router
 from app.utils.exceptions import exceptions, handlers
@@ -21,12 +22,12 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+origins = [o.strip() for o in settings.cors_origins.split(",")]
+
 # CORS middleware for mobile app support
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "*"
-    ],  # Update this to restrict to your mobile app's domains in production
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

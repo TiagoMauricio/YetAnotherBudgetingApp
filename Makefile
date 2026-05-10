@@ -1,6 +1,8 @@
 PYTHON=python3
+IMAGE_NAME=pexa
+IMAGE_TAG=latest
 
-.PHONY: test install format lint clean venv help db-init
+.PHONY: test install format lint clean venv help db-init build run stop logs status restart
 
 # Run tests
 test:
@@ -36,6 +38,30 @@ clean:
 	find . -type d -name "__pycache__" -delete
 	find . -type d -name "*.egg-info" -exec rm -rf {} +
 
+# Build Docker image
+build:
+	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+
+# Deploy with docker compose (pexa + caddy)
+run:
+	docker compose up -d
+
+# Stop docker compose deployment
+stop:
+	docker compose down
+
+# Tail logs from all services
+logs:
+	docker compose logs -f
+
+# Show status of running containers
+status:
+	docker compose ps
+
+# Restart all containers
+restart:
+	docker compose restart
+
 # Setup db for manual testing
 db-init:
 	./bin/init_db.sh
@@ -51,3 +77,9 @@ help:
 	@echo "  clean       - Clean up cache files"
 	@echo "  help        - Show this help message"
 	@echo "  db-init     - Setup user for manual testing (NOTE: needs api running)"
+	@echo "  build       - Build Docker image (IMAGE_NAME=pexa IMAGE_TAG=latest)"
+	@echo "  run         - Deploy with docker compose (pexa + caddy)"
+	@echo "  stop        - Stop docker compose deployment"
+	@echo "  logs        - Tail logs from all services"
+	@echo "  status      - Show status of running containers"
+	@echo "  restart     - Restart all containers"
