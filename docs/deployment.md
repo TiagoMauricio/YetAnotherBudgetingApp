@@ -5,7 +5,7 @@ This guide covers how to deploy Pexa on your own server using Docker Compose and
 
 ## Considerations
 
-This guide will get you going with a simple sqlite3 database with a volume mount and Caddy with a self signed certificate. For more complex setups, feel free to explore using Pexa behind any proxy of your choosing! :D
+This guide will get you going with a simple sqlite3 database through a volume mount and Caddy with a self signed certificate. For more complex setups, feel free to explore using Pexa behind any proxy of your choosing! :D
 
 ## Prerequisites
 
