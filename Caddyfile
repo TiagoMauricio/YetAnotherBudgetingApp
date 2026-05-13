@@ -1,3 +1,4 @@
 localhost {
+    tls internal
     reverse_proxy pexa:8000
 }

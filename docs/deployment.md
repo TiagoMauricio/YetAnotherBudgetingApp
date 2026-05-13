@@ -2,6 +2,11 @@
 
 This guide covers how to deploy Pexa on your own server using Docker Compose and Caddy as a reverse proxy. Caddy handles HTTPS automatically via Let's Encrypt.
 
+
+## Considerations
+
+This guide will get you going with a simple sqlite3 database through a volume mount and Caddy with a self signed certificate. For more complex setups, feel free to explore using Pexa behind any proxy of your choosing! :D
+
 ## Prerequisites
 
 - A Linux server (VPS, home server, etc.)
@@ -102,7 +107,7 @@ The database file is stored in `./data` on the host. Create the directory and se
 
 ```sh
 mkdir -p data
-sudo chown -R 1000:1000 data
+sudo chown -R 100:100 data
 ```
 
 The container runs as a non-root user with UID/GID `1000`. Without the correct ownership Docker will mount the directory as `root` and the container won't be able to write the database file.
