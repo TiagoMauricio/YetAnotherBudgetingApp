@@ -48,15 +48,21 @@ make venv
 make install
 ```
 
-3. Run the app locally:
+3. Run the Alembic migrations:
+
+```sh
+alembic upgrade head
+```
+
+4. Run the app locally:
 
 ```sh
 uvicorn app.main:app --reload
 ```
 
-4. Quickly setup a  user for manual testing
+5. Quickly setup a  user for manual testing
 
-```
+```sh
 make db-init
 ```
 
